@@ -37,6 +37,22 @@ defmodule HELM.Hardware.Controller.ComponentSpecTest do
     end
   end
 
+  describe "update/2" do
+    test "update spec information", %{payload: payload} do
+      assert {:ok, spec} = CtrlCompSpec.create(payload)
+
+      spec_data = %{test: HRand.string()}
+      payload2 = %{spec: spec_data}
+
+      assert {:ok, spec} = CtrlCompSpec.update(spec.spec_id, payload2)
+      assert spec.spec == spec_data
+    end
+
+    test "spec not found" do
+      assert {:error, :notfound} = CtrlCompSpec.update(IPv6.generate([]), %{})
+    end
+  end
+
   test "delete/1 idempotency", %{payload: payload} do
     {:ok, comp_spec} = CtrlCompSpec.create(payload)
     assert :ok = CtrlCompSpec.delete(comp_spec.spec_id)

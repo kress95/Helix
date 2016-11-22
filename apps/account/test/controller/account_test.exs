@@ -73,6 +73,43 @@ defmodule HELM.Account.Controller.AccountTest do
     assert :ok = CtrlAccount.delete(account.account_id)
   end
 
+  describe "update/2" do
+    test "update account", %{payload: payload} do
+      password = HRand.string(min: 8, max: 16)
+      payload2 = %{
+        email: HRand.email() |> String.downcase(),
+        password: password,
+        password_confirmation: password,
+        confirmed: true
+      }
+
+      assert {:ok, account1} = CtrlAccount.create(payload)
+      assert {:ok, account2} = CtrlAccount.update(account1.account_id, payload2)
+
+      assert account2.email == payload2.email
+      refute account2.password == account1.password
+      assert account2.confirmed == payload2.confirmed
+    end
+
+    test "email exists", %{payload: payload} do
+      password = HRand.string(min: 8, max: 16)
+      payload2 = %{
+        email: HRand.email(),
+        password: password,
+        password_confirmation: password,
+        confirmed: true
+      }
+
+      assert {:ok, account1} = CtrlAccount.create(payload)
+      assert {:ok, _} = CtrlAccount.create(payload2)
+      assert {:error, _}    = CtrlAccount.update(account1.account_id, payload2)
+    end
+
+    test "account not found" do
+      assert {:error, :notfound} = CtrlAccount.update(IPv6.generate([]), %{})
+    end
+  end
+
   describe "login/2" do
     test "success", %{payload: payload, email: email, pass: pass} do
       {:ok, _} = CtrlAccount.create(payload)
