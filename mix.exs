@@ -19,6 +19,8 @@ defmodule HELM.Mixfile do
   end
 
   defp aliases do
-    [test: ["helix.test"]]
+    [
+      test: ["helix.test"],
+      seed: ["helix.seed"]]
   end
 end

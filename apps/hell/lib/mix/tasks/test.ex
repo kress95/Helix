@@ -23,6 +23,7 @@ defmodule Mix.Tasks.Helix.Test do
       Mix.Task.run("ecto.drop", [])
       Mix.Task.run("ecto.create", ["--quiet"])
       Mix.Task.run("ecto.migrate", ["--quiet"])
+      Mix.Task.run("helix.seed", [])
     end
 
     Mix.Task.run("test", test_argv)
