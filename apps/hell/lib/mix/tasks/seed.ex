@@ -2,49 +2,52 @@ defmodule Mix.Tasks.Helix.Seed do
 
   use Mix.Task
 
-  @content "Applying seeds"
-  @pad String.duplicate(" ", div(80 - String.length(@content), 2))
+  @recursive true
+
+  @found "Applying seeds"
+  @not_found "No seeds found"
+
+  @found_pad String.duplicate(" ", div(80 - String.length(@found), 2))
+  @not_found_pad String.duplicate(" ", div(80 - String.length(@not_found), 2))
+
+  @found_msg IO.ANSI.green() <> @found_pad <> @found <> @found_pad <> IO.ANSI.default_color()
+  @not_found_msg IO.ANSI.green() <> @not_found_pad <> @not_found <> @not_found_pad <> IO.ANSI.default_color()
+
   @line_div IO.ANSI.cyan() <> String.duplicate("=", 80) <> IO.ANSI.default_color()
-  @msg IO.ANSI.green() <> @pad <> @content <> @pad <> IO.ANSI.default_color()
-  @command IO.ANSI.cyan() <> "mix seed --only=prod" <> IO.ANSI.default_color()
 
-  def run(argv \\ []) do
+  def run(_argv \\ []) do
     Mix.Task.run("compile", [])
+    Mix.Task.run("app.start", [])
 
-    {switches, _, _} = OptionParser.parse(argv, switches: [only: :string])
-
-    Mix.Shell.IO.info @line_div
-    Mix.Shell.IO.info @msg
-    Mix.Shell.IO.info @line_div
-    Mix.Shell.IO.info "If you want to apply just production seeds, run #{@command}"
-
-    Keyword.get(switches, :only, :all)
-    |> add_suffix()
-    |> add_prefix()
-    |> Path.wildcard()
+    Keyword.get(Mix.Project.config, :seeds, [])
+    |> show_message()
+    |> Enum.map(&apply_directory/1)
+    |> List.flatten()
     |> apply_seeds()
   end
 
-  defp add_suffix(:all),
-    do: "*.exs"
+  def show_message([]) do
+    Mix.Shell.IO.info @line_div
+    Mix.Shell.IO.info @not_found_msg
+    Mix.Shell.IO.info @line_div
+    []
+  end
 
-  defp add_suffix(env),
-    do: "*_" <> env <> ".exs"
+  def show_message(patterns) do
+    Mix.Shell.IO.info @line_div
+    Mix.Shell.IO.info @found_msg
+    Mix.Shell.IO.info @line_div
+    patterns
+  end
 
-  defp add_prefix(suffix) do
-    seed = Mix.Project.config |> Keyword.get(:seeds_path, "priv/seeds")
-    path =
-      if Mix.Project.umbrella? do
-        apps = Mix.Project.config |> Keyword.get(:apps_path, "apps")
-        apps <> "/*/" <> seed
-      else
-        seed
-      end
-    path <> "/" <> suffix
+  defp apply_directory(pattern) do
+    "priv/seeds/" <> pattern
   end
 
   defp apply_seeds([file | remainder]) do
-    Mix.Task.run("run", [file])
+    if File.exists?(file) do
+      Code.require_file(file)
+    end
     apply_seeds(remainder)
   end
 

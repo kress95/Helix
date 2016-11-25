@@ -13,6 +13,7 @@ defmodule HELM.Entity.Mixfile do
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       elixirc_options: elixirc_options(Mix.env),
+      seeds: seeds(Mix.env),
       deps: deps()]
   end
 
@@ -39,4 +40,7 @@ defmodule HELM.Entity.Mixfile do
       {:ecto, "~> 2.0"},
       {:ecto_network, "~> 0.4.0"}]
   end
+
+  defp seeds(_),
+    do: ["entity_types.exs"]
 end
