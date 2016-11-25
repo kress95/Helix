@@ -47,6 +47,8 @@ defmodule Mix.Tasks.Helix.Seed do
   defp apply_seeds([file | remainder]) do
     if File.exists?(file) do
       Code.require_file(file)
+    else
+      Mix.raise "File not found: " <> file
     end
     apply_seeds(remainder)
   end
