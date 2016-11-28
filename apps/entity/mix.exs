@@ -13,6 +13,7 @@ defmodule HELM.Entity.Mixfile do
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       elixirc_options: elixirc_options(Mix.env),
+      aliases: aliases,
       deps: deps()]
   end
 
@@ -34,5 +35,9 @@ defmodule HELM.Entity.Mixfile do
     [
       {:helix_core, in_umbrella: true},
       {:account, in_umbrella: true}]
+  end
+
+  defp aliases do
+    [seed: ["run priv/repo/seeds/entity_type.exs"]]
   end
 end

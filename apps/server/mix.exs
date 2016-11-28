@@ -13,6 +13,7 @@ defmodule HELM.Server.Mixfile do
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       elixirc_options: elixirc_options(Mix.env),
+      aliases: aliases,
       deps: deps]
   end
 
@@ -39,5 +40,9 @@ defmodule HELM.Server.Mixfile do
       {:hardware, in_umbrella: true},
       {:ecto, "~> 2.1.0-rc.4", override: true},
       {:ecto_network, "~> 0.4.0"}]
+  end
+
+  defp aliases do
+    [seed: ["run priv/repo/seeds/server_type.exs"]]
   end
 end
