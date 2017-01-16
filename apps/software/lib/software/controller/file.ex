@@ -75,6 +75,11 @@ defmodule Helix.Software.Controller.File do
     |> parse_errors()
   end
 
+  @spec delete(MdlFile.t) :: {:ok, MdlFile.t} | {:error, Ecto.Changeset.t}
+  def delete(file = %MdlFile{}) do
+    Repo.delete(file)
+  end
+
   @spec delete(HELL.PK.t) :: no_return
   def delete(file_id) do
     MdlFile
