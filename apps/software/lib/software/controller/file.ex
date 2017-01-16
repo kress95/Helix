@@ -30,6 +30,20 @@ defmodule Helix.Software.Controller.File do
     end
   end
 
+  @spec move(MdlFile.t, String.t) :: {:ok, MdlFile.t} | {:error, Ecto.Changeset.t}
+  def move(file, file_path) do
+    file
+    |> MdlFile.update_changeset(%{file_path: file_path})
+    |> Repo.update()
+  end
+
+  @spec rename(MdlFile.t, String.t) :: {:ok, MdlFile.t} | {:error, Ecto.Changeset.t}
+  def rename(file, file_name) do
+    file
+    |> MdlFile.update_changeset(%{name: file_name})
+    |> Repo.update()
+  end
+
   @spec delete(HELL.PK.t) :: no_return
   def delete(file_id) do
     MdlFile
