@@ -56,6 +56,25 @@ defmodule Helix.Software.Controller.File do
     |> parse_errors()
   end
 
+  @spec copy(MdlFile.t,
+    %{
+      name: String.t,
+      file_path: String.t,
+      storage_id: PK.t}) ::
+        {:ok, MdlFile.t}
+        | {:error, :file_exists | Ecto.Changeset.t}
+  def copy(file, params) do
+    %{
+      name: params.name,
+      file_path: params.file_path,
+      storage_id: params.storage_id,
+      file_size: file.file_size,
+      file_type: file.file_type}
+    |> MdlFile.create_changeset()
+    |> Repo.insert()
+    |> parse_errors()
+  end
+
   @spec delete(HELL.PK.t) :: no_return
   def delete(file_id) do
     MdlFile
