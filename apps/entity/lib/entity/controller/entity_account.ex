@@ -4,8 +4,6 @@ defmodule Helix.Entity.Controller.EntityAccount do
   alias Helix.Entity.Model.EntityAccount
   alias Helix.Entity.Repo
 
-  import Ecto.Query, only: [where: 3, select: 3]
-
   @spec create(Entity.t, HELL.PK.t) ::
     {:ok, EntityAccount.t}
     | {:error, Ecto.Changeset.t}
@@ -18,8 +16,8 @@ defmodule Helix.Entity.Controller.EntityAccount do
   @spec find(Entity.t) :: {:ok, HELL.PK.t} | {:error, :notfound}
   def find(entity) do
     EntityAccount
-    |> where([a], a.entity_id == ^entity.entity_id)
-    |> select([a], a.account_id)
+    |> EntityAccount.Query.from_entity(entity)
+    |> EntityAccount.Query.select_account_id()
     |> Repo.one()
     |> case do
       nil ->
@@ -27,15 +25,5 @@ defmodule Helix.Entity.Controller.EntityAccount do
       account_id ->
         {:ok, account_id}
     end
-  end
-
-  @spec delete(Entity.t, HELL.PK.t) :: no_return
-  def delete(entity, account_id) do
-    EntityAccount
-    |> where([a], a.entity_id == ^entity.entity_id)
-    |> where([a], a.account_id == ^account_id)
-    |> Repo.delete_all()
-
-    :ok
   end
 end

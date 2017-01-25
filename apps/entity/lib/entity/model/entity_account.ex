@@ -34,4 +34,27 @@ defmodule Helix.Entity.Model.EntityAccount do
     |> validate_required(@creation_fields)
     |> unique_constraint(:account_id)
   end
+
+  defmodule Query do
+
+    alias Helix.Entity.Model.Entity
+    alias Helix.Entity.Model.EntityAccount
+
+    import Ecto.Query, only: [where: 3, select: 3]
+
+    @spec from_entity(Entity.t) :: Ecto.Queryable.t
+    @spec from_entity(Ecto.Queryable.t, Entity.t) :: Ecto.Queryable.t
+    def from_entity(query \\ EntityAccount, entity=%Entity{}),
+      do: where(query, [ea], ea.entity_id == ^entity.entity_id)
+
+    @spec from_entity_id(Entity.id) :: Ecto.Queryable.t
+    @spec from_entity_id(Ecto.Queryable.t, Entity.id) :: Ecto.Queryable.t
+    def from_entity_id(query \\ EntityAccount, entity_id),
+      do: where(query, [ea], ea.entity_id == ^entity_id)
+
+    @spec select_account_id() :: Ecto.Queryable.t
+    @spec select_account_id(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def select_account_id(query \\ EntityAccount),
+      do: select(query, [ea], ea.account_id)
+  end
 end
