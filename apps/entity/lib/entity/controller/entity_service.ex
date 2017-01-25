@@ -5,9 +5,11 @@ defmodule Helix.Controller.EntityService do
   alias HELF.Broker
   alias HELL.PK
   alias Helix.Entity.Controller.Entity, as: EntityController
+  alias Helix.Entity.Controller.EntityAccount, as: EntityAccountController
   alias Helix.Entity.Controller.EntityComponent, as: EntityComponentController
   alias Helix.Entity.Controller.EntityServer, as: EntityServerController
   alias Helix.Entity.Model.Entity
+  alias Helix.Entity.Repo
 
   @typep state :: nil
 
@@ -21,6 +23,7 @@ defmodule Helix.Controller.EntityService do
   def init(_args) do
     Broker.subscribe("entity:create", call: &handle_broker_call/4)
     Broker.subscribe("entity:find", call: &handle_broker_call/4)
+    Broker.subscribe("event:account:created", cast: &handle_broker_cast/4)
     Broker.subscribe("event:server:created", cast: &handle_broker_cast/4)
     Broker.subscribe("event:component:created", cast: &handle_broker_cast/4)
     {:ok, nil}
@@ -35,6 +38,12 @@ defmodule Helix.Controller.EntityService do
   def handle_broker_call(pid, "entity:create", params, req) do
     response = GenServer.call(pid, {:entity, :create, params, req})
     {:reply, response}
+  end
+
+  @doc false
+  def handle_broker_cast(pid, "event:account:created", msg, _req) do
+    %{account_id: account_id} = msg
+    GenServer.cast(pid, {:account, :created, account_id})
   end
 
   @doc false
@@ -79,11 +88,38 @@ defmodule Helix.Controller.EntityService do
   end
 
   @spec handle_cast(
-    {:server, :created, {PK.t, PK.t}, HeBroker.Request.t},
+    {:account, :created, PK.t},
+    state) :: {:noreply, state}
+  @spec handle_cast(
+    {:server, :created, PK.t, PK.t},
     state) :: {:noreply, state}
   @spec handle_cast(
     {:entity, :component, :add, Entity.id, PK.t},
     state) :: {:noreply, state}
+  def handle_cast({:account, :created, account_id}, state) do
+    result = Repo.transaction(fn ->
+      with \
+        {:ok, entity} <- EntityController.create(%{entity_type: "account"}),
+        {:ok, _} <- EntityAccountController.create(entity, account_id)
+      do
+        entity
+      else
+        _ ->
+          Repo.rollback(:internal)
+      end
+    end)
+    case result do
+      {:ok, entity} ->
+        msg = %{
+          entity_id: entity.entity_id,
+          entity_type: entity.entity_type
+        }
+        Broker.cast("event:entity:created", msg)
+        {:noreply, state}
+      {:error, _} ->
+        {:noreply, state}
+    end
+  end
   def handle_cast({:server, :created, server_id, entity_id}, state) do
     EntityServerController.create(entity_id, server_id)
     {:noreply, state}

@@ -45,6 +45,7 @@ defmodule Helix.Account.Controller.AccountService do
     GenServer.from,
     state) :: {:reply, {:ok, Account.id} | {:error, :notfound}, state}
   @doc false
+<<<<<<< HEAD
   def handle_call({:account, :create, params, req}, _from, state) do
     with \
       changeset = %{valid?: true} <- Account.create_changeset(params),
@@ -57,9 +58,15 @@ defmodule Helix.Account.Controller.AccountService do
       Broker.cast("event:account:created", msg, request: req)
       {:reply, {:ok, account}, state}
     else
+=======
+  def handle_call({:account, :create, params, request}, _from, state) do
+    case AccountController.create(params) do
+      {:ok, account} ->
+        msg = %{account_id: account.account_id}
+        Broker.cast("event:account:created", msg, request: request)
+        {:reply, {:ok, account}, state}
+>>>>>>> Update Account and Entity to use EntityAccount, also fix some invalid typespecs from EntityService.
       {:error, error} ->
-        {:reply, {:error, error}, state}
-      error ->
         {:reply, {:error, error}, state}
     end
   end
