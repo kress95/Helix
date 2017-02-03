@@ -24,6 +24,5 @@ defmodule Helix.Software.Model.FileType do
     %__MODULE__{}
     |> cast(params, @creation_fields)
     |> validate_required(@creation_fields)
-    |> unique_constraint(:file_type)
   end
 end
