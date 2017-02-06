@@ -5,6 +5,7 @@ defmodule Helix.Account.Controller.AccountService do
   alias HELF.Broker
   alias HELF.Router
   alias Helix.Account.Controller.Account, as: AccountController
+  alias Helix.Account.Controller.AccountQuery
   alias Helix.Account.Controller.Session, as: SessionController
   alias Helix.Account.Model.Account
 
@@ -28,9 +29,15 @@ defmodule Helix.Account.Controller.AccountService do
     response = GenServer.call(pid, {:account, :login, email, password})
     {:reply, response}
   end
+  def handle_broker_call(pid, "account.query", msg, _) do
+    %{"query" => query, "params" => params} = msg
+    response = GenServer.call(pid, {:account, :query, query, params})
+    {:reply, response}
+  end
 
   @spec init(any) :: {:ok, state}
   def init(_args) do
+    Broker.subscribe("account.query", call: &handle_broker_call/4)
     Broker.subscribe("account.create", call: &handle_broker_call/4)
     Broker.subscribe("account.login", call: &handle_broker_call/4)
 
@@ -45,6 +52,10 @@ defmodule Helix.Account.Controller.AccountService do
     {:account, :login, Account.email, Account.password},
     GenServer.from,
     state) :: {:reply, {:ok, Account.id} | {:error, :notfound}, state}
+  @spec handle_call(
+    {:account, :query, String.t, map},
+    GenServer.from,
+    state) :: {:reply, {:ok, String.t} | {:error, :notfound | :invalid_query}, state}
   @doc false
   def handle_call({:account, :create, params}, _from, state) do
     case AccountController.create(params) do
@@ -66,5 +77,10 @@ defmodule Helix.Account.Controller.AccountService do
       error ->
         {:reply, error, state}
     end
+  end
+  def handle_call({:account, :query, name, params}, _from, state) do
+    response = AccountQuery.handle_query(name, params)
+
+    {:reply, response, state}
   end
 end

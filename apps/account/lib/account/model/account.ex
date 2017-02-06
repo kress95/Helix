@@ -134,7 +134,7 @@ defmodule Helix.Account.Model.Account do
     alias HELL.PK
     alias Helix.Account.Model.Account
 
-    import Ecto.Query, only: [where: 3]
+    import Ecto.Query, only: [where: 3, select: 3]
 
     @spec by_id(PK.t) :: Ecto.Queryable.t
     @spec by_id(Ecto.Queryable.t, PK.t) :: Ecto.Queryable.t
@@ -145,5 +145,15 @@ defmodule Helix.Account.Model.Account do
     @spec by_username(Ecto.Queryable.t, String.t) :: Ecto.Queryable.t
     def by_username(query \\ Account, username),
       do: where(query, [a], a.username == ^username)
+
+    @spec select_username() :: Ecto.Queryable.t
+    @spec select_username(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def select_username(query \\ Account),
+      do: select(query, [a], a.username)
+
+    @spec select_email() :: Ecto.Queryable.t
+    @spec select_email(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def select_email(query \\ Account),
+      do: select(query, [a], a.email)
   end
 end
