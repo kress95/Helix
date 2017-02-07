@@ -127,5 +127,10 @@ defmodule Helix.Hardware.Model.MotherboardSlot do
     def select_component_id(query \\ MotherboardSlot) do
       select(query, [ms], ms.link_component_id)
     end
+
+    @spec select_component_type(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def select_component_type(query \\ MotherboardSlot) do
+      select(query, [ms], ms.link_component_type)
+    end
   end
 end

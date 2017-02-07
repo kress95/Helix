@@ -52,12 +52,21 @@ defmodule Helix.Hardware.Model.Component do
 
   defmodule Query do
 
+    alias HELL.PK
     alias Helix.Hardware.Model.Component
 
-    import Ecto.Query, only: [where: 3]
+    import Ecto.Query, only: [where: 3, select: 3]
 
-    def by_id(query \\ Component, component_id) do
-      where(query, [c], c.component_id == ^component_id)
-    end
+    @spec by_id(Ecto.Queryable.t, PK.t) :: Ecto.Queryable.t
+    def by_id(query \\ Component, component_id),
+      do: where(query, [c], c.component_id == ^component_id)
+
+    @spec select_component_type(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def select_component_type(query \\ Component),
+      do: select(query, [c], c.component_type)
+
+    @spec select_component_spec(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def select_component_spec(query \\ Component),
+      do: select(query, [c], c.component_spec)
   end
 end

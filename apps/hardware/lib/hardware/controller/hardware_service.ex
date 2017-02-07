@@ -5,6 +5,7 @@ defmodule Helix.Hardware.Controller.HardwareService do
   alias HELF.Broker
   alias Helix.Hardware.Controller.Component, as: ComponentController
   alias Helix.Hardware.Controller.ComponentSpec, as: ComponentSpecController
+  alias Helix.Hardware.Controller.HardwareQuery
   alias Helix.Hardware.Controller.Motherboard, as: MotherboardController
   alias Helix.Hardware.Controller.MotherboardSlot, as: MotherboardSlotController
   alias Helix.Hardware.Model.Component
@@ -103,6 +104,10 @@ defmodule Helix.Hardware.Controller.HardwareService do
     {:motherboard, :resources, HELL.PK.t},
     GenServer.from,
     state) :: {:reply, {:ok, %{any => any}} | {:error, :notfound}, state}
+  @spec handle_call(
+    {:hardware, :query, String.t, map},
+    GenServer.from,
+    state) :: {:reply, {:ok, any} | {:error, :notfound | :invalid_query}, state}
   @doc false
   def handle_call({:motherboard, :create, {:component_spec, :id, spec_id}}, _from, state) do
     with \
@@ -196,6 +201,12 @@ defmodule Helix.Hardware.Controller.HardwareService do
       _ ->
         {:reply, {:error, :notfound}, state}
     end
+  end
+
+  def handle_call({:hardware, :query, name, params}, _from, state) do
+    response = HardwareQuery.handle_query(name, params)
+
+    {:reply, response, state}
   end
 
   @spec create_motherboard(String.t, HELL.PK.t) ::
