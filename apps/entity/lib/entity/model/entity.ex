@@ -45,4 +45,21 @@ defmodule Helix.Entity.Model.Entity do
     |> cast(params, @creation_fields)
     |> validate_required(@creation_fields)
   end
+
+
+  defmodule Query do
+
+    alias HELL.PK
+    alias Helix.Entity.Model.Entity
+
+    import Ecto.Query, only: [where: 3, select: 3]
+
+    @spec by_id(Ecto.Queryable.t, PK.t) :: Ecto.Queryable.t
+    def by_id(query \\ Entity, entity_id),
+      do: where(query, [c], c.entity_id == ^entity_id)
+
+    @spec select_entity_type(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def select_entity_type(query \\ Entity),
+      do: select(query, [c], c.entity_type)
+  end
 end

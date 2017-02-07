@@ -6,6 +6,7 @@ defmodule Helix.Controller.EntityService do
   alias HELL.PK
   alias Helix.Entity.Controller.Entity, as: EntityController
   alias Helix.Entity.Controller.EntityComponent, as: EntityComponentController
+  alias Helix.Entity.Controller.EntityQuery
   alias Helix.Entity.Controller.EntityServer, as: EntityServerController
   alias Helix.Entity.Model.Entity
 
@@ -20,6 +21,13 @@ defmodule Helix.Controller.EntityService do
   def handle_broker_call(pid, "entity.find", msg, _req) do
     %{entity_id: entity_id} = msg
     response = GenServer.call(pid, {:entity, :find, entity_id})
+    {:reply, response}
+  end
+  def handle_broker_call(pid, "entity.query", msg, _req) do
+    %{"query" => query, "params" => params} = msg
+
+    response = GenServer.call(pid, {:entity, :query, query, params})
+
     {:reply, response}
   end
 
@@ -41,6 +49,7 @@ defmodule Helix.Controller.EntityService do
   @doc false
   def init(_args) do
     Broker.subscribe("entity.find", call: &handle_broker_call/4)
+    Broker.subscribe("entity.query", call: &handle_broker_call/4)
     Broker.subscribe("event.account.created", cast: &handle_broker_cast/4)
     Broker.subscribe("event.server.created", cast: &handle_broker_cast/4)
     Broker.subscribe("event.component.created", cast: &handle_broker_cast/4)
@@ -52,9 +61,18 @@ defmodule Helix.Controller.EntityService do
     {:entity, :find, PK.t},
     GenServer.from,
     state) :: {:reply, {:ok, Entity.t} | {:error, :notfound}, state}
+  @spec handle_call(
+    {:entity, :query, String.t, map},
+    GenServer.from,
+    state) :: {:reply, {:ok, any} | {:error, :notfound | :invalid_query}, state}
   @doc false
   def handle_call({:entity, :find, id}, _from, state) do
     response = EntityController.find(id)
+    {:reply, response, state}
+  end
+  def handle_call({:entity, :query, name, params}, _from, state) do
+    response = EntityQuery.handle_query(name, params)
+
     {:reply, response, state}
   end
 
