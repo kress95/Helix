@@ -68,4 +68,28 @@ defmodule Helix.Server.Model.Server do
     changeset
     |> cast(%{server_id: ip}, [:server_id])
   end
+
+  defmodule Query do
+
+    alias HELL.PK
+    alias Helix.Server.Model.Server
+
+    import Ecto.Query, only: [where: 3, select: 3]
+
+    @spec by_id(Ecto.Queryable.t, PK.t) :: Ecto.Queryable.t
+    def by_id(query \\ Server, server_id),
+      do: where(query, [s], s.server_id == ^server_id)
+
+    @spec select_poi_id(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def select_poi_id(query \\ Server),
+      do: select(query, [s], s.poi_id)
+
+    @spec select_motherboard_id(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def select_motherboard_id(query \\ Server),
+      do: select(query, [s], s.motherboard_id)
+
+    @spec select_server_type(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def select_server_type(query \\ Server),
+      do: select(query, [s], s.server_type)
+  end
 end

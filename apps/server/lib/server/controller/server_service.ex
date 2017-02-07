@@ -5,6 +5,7 @@ defmodule Helix.Server.Controller.ServerService do
   alias HELF.Broker
   alias HELL.PK
   alias Helix.Server.Controller.Server, as: ServerController
+  alias Helix.Server.Controller.ServerQuery
   alias Helix.Server.Model.Server
 
   @typep state :: nil
@@ -144,5 +145,10 @@ defmodule Helix.Server.Controller.ServerService do
       _ ->
         {:reply, {:error, :notfound}, state}
     end
+  end
+  def handle_call({:server, :query, name, params}, _from, state) do
+    result = ServerQuery.handle_query(name, params)
+
+    {:ok, {:reply, result}, state}
   end
 end
