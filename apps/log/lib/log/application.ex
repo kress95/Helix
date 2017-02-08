@@ -7,7 +7,8 @@ defmodule Helix.Log.Application do
     import Supervisor.Spec
 
     children = [
-      worker(Helix.Log.Repo, [])
+      worker(Helix.Log.Repo, []),
+      worker(Helix.Log.Controller.LogService, [])
     ]
 
     opts = [strategy: :one_for_one, name: Helix.Log.Supervisor]

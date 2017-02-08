@@ -105,6 +105,11 @@ defmodule Helix.Log.Model.Log do
 
     import Ecto.Query, only: [join: 5, order_by: 3, select: 3, where: 3]
 
+    @spec by_id(Ecto.Queryable.t, HELL.PK.t) :: Ecto.Queryable.t
+    def by_id(query \\ Log, log_id) do
+      where(query, [l], l.log_id == ^log_id)
+    end
+
     @spec edited_by_entity(Ecto.Queryable.t, HELL.PK.t) :: Ecto.Queryable.t
     def edited_by_entity(query \\ Log, entity_id) do
       query

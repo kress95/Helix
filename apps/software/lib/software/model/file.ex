@@ -93,4 +93,16 @@ defmodule Helix.Software.Model.File do
       put_change(changeset, :file_id, pk)
     end
   end
+
+  defmodule Query do
+
+    alias HELL.PK
+    alias Helix.Software.Model.File
+
+    import Ecto.Query, only: [where: 3]
+
+    @spec by_id(Ecto.Queryable.t, PK.t) :: Ecto.Queryable.t
+    def by_id(query \\ File, file_id),
+      do: where(query, [f], f.file_id == ^file_id)
+  end
 end

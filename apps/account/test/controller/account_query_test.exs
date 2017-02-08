@@ -24,7 +24,7 @@ defmodule Helix.Account.Controller.AccountQueryTest do
   describe "querying getUsername" do
     test "succeeds when account exists" do
       account = create_user()
-      msg = %{query: "getUsername", params: %{id: account.account_id}}
+      msg = %{query: "getUsername", params: %{account_id: account.account_id}}
 
       {_, {:ok, username}} = Broker.call("account.query", msg)
 
@@ -32,7 +32,7 @@ defmodule Helix.Account.Controller.AccountQueryTest do
     end
 
     test "fails when account doesn't exists" do
-      msg = %{query: "getUsername", params: %{id: Random.pk()}}
+      msg = %{query: "getUsername", params: %{account_id: Random.pk()}}
 
       {_, result} = Broker.call("account.query", msg)
 

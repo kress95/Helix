@@ -5,11 +5,10 @@ defmodule Helix.Entity.Controller.EntityQuery do
   alias Helix.Entity.Model.EntityServer
   alias Helix.Entity.Repo
 
-  def handle_query("getEntityType", %{id: id}) do
+  def handle_query("getEntity", %{entity_id: id}) do
     result =
       id
       |> Entity.Query.by_id()
-      |> Entity.Query.select_entity_type()
       |> Repo.one()
 
     case result do
@@ -20,34 +19,24 @@ defmodule Helix.Entity.Controller.EntityQuery do
     end
   end
 
-  def handle_query("getEntityComponents", %{id: id}) do
-    result =
+  def handle_query("getComponents", %{entity_id: id}) do
+    components =
       id
       |> EntityComponent.Query.from_entity()
       |> EntityComponent.Query.select_component_id()
       |> Repo.all()
 
-    case result do
-      [] ->
-        {:error, :notfound}
-      components ->
-        {:ok, components}
-    end
+    {:ok, components}
   end
 
-  def handle_query("getEntityServers", %{id: id}) do
-    result =
+  def handle_query("getServers", %{entity_id: id}) do
+    servers =
       id
       |> EntityServer.Query.from_entity()
       |> EntityServer.Query.select_server_id()
       |> Repo.all()
 
-    case result do
-      [] ->
-        {:error, :notfound}
-      servers ->
-        {:ok, servers}
-    end
+    {:ok, servers}
   end
 
   def handle_query(_, _),

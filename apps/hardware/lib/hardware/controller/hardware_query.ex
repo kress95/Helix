@@ -2,25 +2,39 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
 
   alias Helix.Hardware.Model.Component
   alias Helix.Hardware.Model.Motherboard
-  alias Helix.Hardware.Model.MotherboardSlot
   alias Helix.Hardware.Repo
 
-  def handle_query("getComponentType", %{id: id}) do
+  def handle_query("getComponent", %{component_id: id}) do
     result =
       id
       |> Component.Query.by_id(id)
-      |> Component.Query.select_component_type()
       |> Repo.one()
 
     case result do
       nil ->
         {:error, :notfound}
-      component_type ->
-        {:ok, component_type}
+      component ->
+        {:ok, component}
     end
   end
 
-  def handle_query("getComponentSpec", %{id: id}) do
+  def handle_query("isComponentLinked", %{component_id: id}) do
+    # FIXME: add changeset validations T420
+    result =
+      id
+      |> Component.Query.by_id(id)
+      |> Component.Query.select_component_slot()
+      |> Repo.one()
+
+    case result do
+      nil ->
+        {:ok, false}
+      _ ->
+        {:ok, true}
+    end
+  end
+
+  def handle_query("getSpecOfComponent", %{component_id: id}) do
     # FIXME: add changeset validations T420
     result =
       id
@@ -31,12 +45,12 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
     case result do
       nil ->
         {:error, :notfound}
-      component_type ->
-        {:ok, component_type}
+      component_spec ->
+        {:ok, component_spec}
     end
   end
 
-  def handle_query("getMotherboardSlots", %{id: id}) do
+  def handle_query("getSlotsOfMotherboard", %{motherboard_id: id}) do
     # FIXME: add changeset validations T420
     result =
       id
@@ -49,38 +63,6 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
         {:error, :notfound}
       slots ->
         {:ok, slots}
-    end
-  end
-
-  def handle_query("getSlotType", %{id: id}) do
-    # FIXME: add changeset validations T420
-    result =
-      id
-      |> MotherboardSlot.Query.by_id(id)
-      |> MotherboardSlot.Query.select_component_type()
-      |> Repo.one()
-
-    case result do
-      nil ->
-        {:error, :notfound}
-      component_type ->
-        {:ok, component_type}
-    end
-  end
-
-  def handle_query("getSlotLinkedComponent", %{id: id}) do
-    # FIXME: add changeset validations T420
-    result =
-      id
-      |> MotherboardSlot.Query.by_id(id)
-      |> MotherboardSlot.Query.select_component_id()
-      |> Repo.one()
-
-    case result do
-      nil ->
-        {:error, :notfound}
-      component_id ->
-        {:ok, component_id}
     end
   end
 
