@@ -5,7 +5,7 @@ defmodule Helix.Entity.Controller.EntityQuery do
   alias Helix.Entity.Model.EntityServer
   alias Helix.Entity.Repo
 
-  def handle_query("getEntityType", %{"id" => id}) do
+  def handle_query("getEntityType", %{id: id}) do
     result =
       id
       |> Entity.Query.by_id()
@@ -20,7 +20,7 @@ defmodule Helix.Entity.Controller.EntityQuery do
     end
   end
 
-  def handle_query("getEntityComponents", %{"id" => id}) do
+  def handle_query("getEntityComponents", %{id: id}) do
     result =
       id
       |> EntityComponent.Query.from_entity()
@@ -35,7 +35,7 @@ defmodule Helix.Entity.Controller.EntityQuery do
     end
   end
 
-  def handle_query("getEntityServers", %{"id" => id}) do
+  def handle_query("getEntityServers", %{id: id}) do
     result =
       id
       |> EntityServer.Query.from_entity()

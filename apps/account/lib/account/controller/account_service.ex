@@ -30,7 +30,7 @@ defmodule Helix.Account.Controller.AccountService do
     {:reply, response}
   end
   def handle_broker_call(pid, "account.query", msg, _) do
-    %{"query" => query, "params" => params} = msg
+    %{query: query, params: params} = msg
     response = GenServer.call(pid, {:account, :query, query, params})
     {:reply, response}
   end

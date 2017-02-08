@@ -3,7 +3,7 @@ defmodule Helix.Server.Controller.ServerQuery do
   alias Helix.Server.Model.Server
   alias Helix.Server.Repo
 
-  def handle_query("getPOIID", %{"id" => id}) do
+  def handle_query("getPOIID", %{id: id}) do
     # FIXME: add changeset validations T420
     result =
       id
@@ -19,7 +19,7 @@ defmodule Helix.Server.Controller.ServerQuery do
     end
   end
 
-  def handle_query("getAttachedMotherboardID", %{"id" => id}) do
+  def handle_query("getAttachedMotherboardID", %{id: id}) do
     # FIXME: add changeset validations T420
     result =
       id
@@ -35,7 +35,7 @@ defmodule Helix.Server.Controller.ServerQuery do
     end
   end
 
-  def handle_query("getServerType", %{"id" => id}) do
+  def handle_query("getServerType", %{id: id}) do
     # FIXME: add changeset validations T420
     result =
       id

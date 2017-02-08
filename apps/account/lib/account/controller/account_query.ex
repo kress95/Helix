@@ -3,7 +3,7 @@ defmodule Helix.Account.Controller.AccountQuery do
   alias Helix.Account.Model.Account
   alias Helix.Account.Repo
 
-  def handle_query("getEmail", %{"id" => id}) do
+  def handle_query("getEmail", %{id: id}) do
     # FIXME: add changeset validations T420
     result =
       id
@@ -19,7 +19,7 @@ defmodule Helix.Account.Controller.AccountQuery do
     end
   end
 
-  def handle_query("getUsername", %{"id" => id}) do
+  def handle_query("getUsername", %{id: id}) do
     # FIXME: add changeset validations T420
     # FIXME: change this to fetch username once D59 lands
     result =

@@ -5,7 +5,7 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
   alias Helix.Hardware.Model.MotherboardSlot
   alias Helix.Hardware.Repo
 
-  def handle_query("getComponentType", %{"id" => id}) do
+  def handle_query("getComponentType", %{id: id}) do
     result =
       id
       |> Component.Query.by_id(id)
@@ -20,7 +20,7 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
     end
   end
 
-  def handle_query("getComponentSpec", %{"id" => id}) do
+  def handle_query("getComponentSpec", %{id: id}) do
     # FIXME: add changeset validations T420
     result =
       id
@@ -36,7 +36,7 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
     end
   end
 
-  def handle_query("getMotherboardSlots", %{"id" => id}) do
+  def handle_query("getMotherboardSlots", %{id: id}) do
     # FIXME: add changeset validations T420
     result =
       id
@@ -52,7 +52,7 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
     end
   end
 
-  def handle_query("getSlotType", %{"id" => id}) do
+  def handle_query("getSlotType", %{id: id}) do
     # FIXME: add changeset validations T420
     result =
       id
@@ -68,7 +68,7 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
     end
   end
 
-  def handle_query("getSlotLinkedComponent", %{"id" => id}) do
+  def handle_query("getSlotLinkedComponent", %{id: id}) do
     # FIXME: add changeset validations T420
     result =
       id
