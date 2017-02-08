@@ -65,17 +65,16 @@ defmodule Helix.Hardware.Model.Motherboard do
     alias HELL.PK
     alias Helix.Hardware.Model.Motherboard
 
-    import Ecto.Query, only: [where: 3, select: 3, preload: 2]
+    import Ecto.Query, only: [where: 3, preload: 2]
 
     @spec by_id(Ecto.Queryable.t, PK.t) :: Ecto.Queryable.t
     def by_id(query \\ Motherboard, motherboard_id),
       do: where(query, [m], m.motherboard_id == ^motherboard_id)
 
-    @spec select_slots(Ecto.Queryable.t) :: Ecto.Queryable.t
-    def select_slots(query \\ Motherboard) do
+    @spec preload_slots(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def preload_slots(query \\ Motherboard) do
       query
       |> preload(:slots)
-      |> select([m], m.slots)
     end
   end
 end

@@ -43,6 +43,14 @@ defmodule Helix.Hardware.Controller.HardwareService do
     {:reply, response}
   end
 
+  def handle_broker_call(pid, "hardware.query", msg, _) do
+    %{query: name, params: params} = msg
+    response = GenServer.call(pid, {:hardware, :query, name, params})
+
+    {:reply, response}
+  end
+
+
   def handle_broker_cast(pid, "event.server.created", msg, _) do
     %{
       entity_id: entity_id,
@@ -71,6 +79,7 @@ defmodule Helix.Hardware.Controller.HardwareService do
     Broker.subscribe("hardware.component.get", call: &handle_broker_call/4)
     Broker.subscribe("hardware.motherboard.create", call: &handle_broker_call/4)
     Broker.subscribe("hardware.motherboard.resources", call: &handle_broker_call/4)
+    Broker.subscribe("hardware.query", call: &handle_broker_call/4)
     Broker.subscribe("event.server.created", cast: &handle_broker_cast/4)
 
     {:ok, nil}
