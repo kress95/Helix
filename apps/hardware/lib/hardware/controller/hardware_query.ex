@@ -1,5 +1,6 @@
 defmodule Helix.Hardware.Controller.HardwareQuery do
 
+  alias HELF.Broker
   alias Helix.Hardware.Model.Component
   alias Helix.Hardware.Model.MotherboardSlot
   alias Helix.Hardware.Repo
@@ -18,6 +19,28 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
         {:ok, component}
     end
   end
+
+  def handle_query("listComponents", %{entity_id: entity_id}) do
+    # FIXME: add changeset validations T420
+    {_, result} = Broker.call("entity.list.components", entity_id)
+
+    case result do
+      {:ok, component_list} ->
+        {:ok, %{list: component_list}}
+      {:error, error} ->
+        {:error, error}
+      error ->
+        {:error, error}
+    end
+  end
+
+  # FIXME: impossible to do performatically without adding
+  # component_type # to EntityComponent and indexing by
+  # [component_type, component_id].
+  #
+  # alternative method: adding EntityMotherboard
+  # def handle_query("listMotherboards", %{id: entity_id}) do
+  # end
 
   def handle_query("listMotherboardSlots", %{id: motherboard_id}) do
     # FIXME: add changeset validations T420

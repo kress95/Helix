@@ -53,14 +53,17 @@ defmodule Helix.Account.Controller.AccountSetting do
   end
 
   @spec get_settings(Account.t) :: %{Setting.id => String.t}
-  def get_settings(account) do
+  @spec get_settings(Account.id) :: %{Setting.id => String.t}
+  def get_settings(account = %Account{}),
+    do: get_settings(account.account_id)
+  def get_settings(account_id) do
     default_settings =
       Setting.Query.select_setting_id_and_default_value()
       |> Repo.all()
       |> :maps.from_list()
 
     custom_settings =
-      account.account_id
+      account_id
       |> AccountSetting.Query.by_account_id()
       |> AccountSetting.Query.select_setting_id_and_setting_value()
       |> Repo.all()

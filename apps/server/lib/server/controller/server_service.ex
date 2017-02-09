@@ -31,8 +31,9 @@ defmodule Helix.Server.Controller.ServerService do
     {:reply, response}
   end
   def handle_broker_call(pid, "server.query", msg, _) do
-    %{server_id: id} = msg
-    response = GenServer.call(pid, {:server, :find, id})
+    %{query: name, params: params} = msg
+    response = GenServer.call(pid, {:server, :query, name, params})
+
     {:reply, response}
   end
   def handle_broker_call(pid, "server.hardware.resources", msg, _) do
@@ -149,6 +150,6 @@ defmodule Helix.Server.Controller.ServerService do
   def handle_call({:server, :query, name, params}, _from, state) do
     result = ServerQuery.handle_query(name, params)
 
-    {:ok, {:reply, result}, state}
+    {:reply, result, state}
   end
 end

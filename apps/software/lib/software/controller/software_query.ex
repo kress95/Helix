@@ -1,21 +1,13 @@
 defmodule Helix.Software.Controller.SoftwareQuery do
 
-  alias Helix.Software.Model.File
-  alias Helix.Software.Repo
+  # def handle_query("getSoftware", %{id: software_id}) do
+  # end
 
-  def handle_query("getSoftware", %{file_id: id}) do
-    result =
-      id
-      |> File.Query.by_id()
-      |> Repo.one()
+  # def handle_query("listSoftware", %{storage_id: storage_id}) do
+  # end
 
-    case result do
-      nil ->
-        {:error, :notfound}
-      file ->
-        {:ok, file}
-    end
-  end
+  # def handle_query("listSoftware", %{server_id: server_id}) do
+  # end
 
   def handle_query(_, _),
     do: {:error, :invalid_query}

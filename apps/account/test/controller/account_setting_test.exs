@@ -41,23 +41,23 @@ defmodule Helix.Account.Controller.AccountSettingTest do
 
   describe "configuring user settings" do
     test "succeeds when setting exists", context do
-        id = context.setting_id
-        custom_val = Random.string(min: 10)
-        account = create_account()
+      id = context.setting_id
+      custom_val = Random.string(min: 10)
+      account = create_account()
 
-        {:ok, put_value} = AccountSettingController.put(account, id, custom_val)
-        {:ok, get_value} = AccountSettingController.get(account, id)
+      {:ok, put_value} = AccountSettingController.put(account, id, custom_val)
+      {:ok, get_value} = AccountSettingController.get(account, id)
 
-        %{default_value: default} = Repo.get_by(Setting, setting_id: id)
+      %{default_value: default} = Repo.get_by(Setting, setting_id: id)
 
-        # got expected value from put
-        assert custom_val == put_value
+      # got expected value from put
+      assert custom_val == put_value
 
-        # default value differs from put value
-        refute default == put_value
+      # default value differs from put value
+      refute default == put_value
 
-        # both values from put and get are equals
-        assert put_value == get_value
+      # both values from put and get are equals
+      assert put_value == get_value
     end
 
     test "fails when setting is invalid" do
