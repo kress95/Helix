@@ -7,82 +7,50 @@ defmodule Helix.Hardware.Controller.ComponentSpecTest do
   alias Helix.Hardware.Model.ComponentSpec
   alias Helix.Hardware.Repo
 
-  setup do
-    type = Enum.random(["cpu", "ram", "hdd", "nic"])
-    params = %{
-      component_type: type,
-      spec: spec_for(type)
-    }
-    component_spec =
-      params
-      |> ComponentSpec.create_changeset()
-      |> Repo.insert!()
+  alias Helix.Hardware.Factory
 
-    {:ok, component_spec: component_spec}
-  end
-
-  describe "find" do
-    test "fetching component_spec by id", %{component_spec: cs} do
+  describe "fetching component_spec" do
+    test "succeeds by id" do
+      cs = Factory.insert(:component_spec)
       assert {:ok, _} = ComponentSpecController.find(cs.spec_id)
     end
 
-    test "returns error when spec doesn't exists" do
+    test "fails when spec doesn't exists" do
       assert {:error, :notfound} === ComponentSpecController.find(Random.pk())
     end
   end
 
-  describe "update" do
-    test "overrides the spec", %{component_spec: cs} do
-      update_params = %{spec: %{"test" => Burette.Color.name()}}
-      {:ok, spec} = ComponentSpecController.update(cs, update_params)
+  test "updating component_spec overrides its spec" do
+    cs = Factory.insert(:component_spec)
+    update_params = %{spec: %{"test" => Burette.Color.name()}}
 
-      assert update_params.spec === spec.spec
-      Repo.delete(spec)
+    {:ok, cs} = ComponentSpecController.update(cs, update_params)
+
+    assert update_params.spec === cs.spec
+  end
+
+  describe "deleting component_spec" do
+    test "is idempotent" do
+      cs = Factory.insert(:component_spec)
+
+      assert Repo.get_by(ComponentSpec, spec_id: cs.spec_id)
+
+      :ok = ComponentSpecController.delete(cs.spec_id)
+      :ok = ComponentSpecController.delete(cs.spec_id)
+
+      refute Repo.get_by(ComponentSpec, spec_id: cs.spec_id)
     end
-  end
 
-  test "delete is idempotent", %{component_spec: cs} do
-    assert Repo.get_by(ComponentSpec, spec_id: cs.spec_id)
-    ComponentSpecController.delete(cs.spec_id)
-    ComponentSpecController.delete(cs.spec_id)
-    ComponentSpecController.delete(cs.spec_id)
-    refute Repo.get_by(ComponentSpec, spec_id: cs.spec_id)
-  end
+    test "works by id and by struct" do
+      cs = Factory.insert(:component_spec)
+      :ok = ComponentSpecController.delete(cs)
 
-  defp spec_for("cpu") do
-    %{
-      "spec_code": String.upcase(Random.string(min: 12)),
-      "spec_type": "CPU",
-      "name": Random.string(min: 12),
-      "clock": Random.number(66..3200),
-      "cores": Random.number(1..4)
-    }
-  end
+      refute Repo.get_by(ComponentSpec, spec_id: cs.spec_id)
 
-  defp spec_for("ram") do
-    %{
-      "spec_code": String.upcase(Random.string(min: 12)),
-      "spec_type": "RAM",
-      "name": Random.string(min: 12),
-      "clock": Random.number(66..3200),
-      "ram_size": Random.number(256..8192)
-    }
-  end
+      cs = Factory.insert(:component_spec)
+      :ok = ComponentSpecController.delete(cs.spec_id)
 
-  defp spec_for("hdd") do
-    %{
-      "spec_code": String.upcase(Random.string(min: 12)),
-      "spec_type": "HDD",
-      "name": Random.string(min: 12),
-      "hdd_size": Random.number(256..8192)
-    }
-  end
-
-  defp spec_for("nic") do
-    %{
-      "spec_code": String.upcase(Random.string(min: 12)),
-      "spec_type": "NIC",
-      "name": Random.string(min: 12)
-    }
+      refute Repo.get_by(ComponentSpec, spec_id: cs.spec_id)
+    end
   end
 end
