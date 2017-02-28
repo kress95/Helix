@@ -6,8 +6,10 @@ defmodule Helix.Account.Controller.AccountService do
   alias HELF.Router
   alias Helix.Account.Controller.Account, as: AccountController
   alias Helix.Account.Controller.AccountQuery
+  alias Helix.Account.Controller.AccountSetting, as: AccountSettingController
   alias Helix.Account.Controller.Session, as: SessionController
   alias Helix.Account.Model.Account
+  alias Helix.Account.Model.Setting
 
   @typep state :: nil
 
@@ -83,4 +85,17 @@ defmodule Helix.Account.Controller.AccountService do
 
     {:reply, response, state}
   end
+
+  @spec find_account(Account.id) :: {:ok, Account.t} | {:error, :notfound}
+  def find_account(account_id),
+    do: AccountController.find(account_id)
+
+  @spec find_account_by(username: Account.username) ::
+    {:ok, Account.t} | {:error, :notfound}
+  def find_account_by(username: username),
+    do: AccountController.find_by(username: username)
+
+  @spec get_account_settings(Account.id) :: %{Setting.id => String.t}
+  def get_account_settings(account_id),
+    do: AccountSettingController.get_settings(account_id)
 end

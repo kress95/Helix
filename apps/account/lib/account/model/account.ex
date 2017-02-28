@@ -146,6 +146,11 @@ defmodule Helix.Account.Model.Account do
     def by_username(query \\ Account, username),
       do: where(query, [a], a.username == ^username)
 
+    @spec by_email(String.t) :: Ecto.Queryable.t
+    @spec by_email(Ecto.Queryable.t, String.t) :: Ecto.Queryable.t
+    def by_email(query \\ Account, email),
+      do: where(query, [a], a.email == ^email)
+
     @spec select_username() :: Ecto.Queryable.t
     @spec select_username(Ecto.Queryable.t) :: Ecto.Queryable.t
     def select_username(query \\ Account),

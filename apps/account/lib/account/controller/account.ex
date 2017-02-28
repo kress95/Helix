@@ -23,11 +23,27 @@ defmodule Helix.Account.Controller.Account do
     end
   end
 
-  @spec find_by([email: Account.email]) :: {:ok, Account.t} | {:error, :notfound}
-  def find_by(email: email) do
+  @spec find_by(
+    Ecto.Queryable.t,
+    [{:username, Account.username}
+    | {:email, Account.email}]) :: {:ok, Account.t} | {:error, :notfound}
+  def find_by(query \\ Account, keywords)
+  def find_by(query, [{:username, username} | t]) do
+    username = String.downcase(username)
+
+    query
+    |> Account.Query.by_username(username)
+    |> find_by(t)
+  end
+  def find_by(query, [{:email, email} | t]) do
     email = String.downcase(email)
 
-    case Repo.get_by(Account, email: email) do
+    query
+    |> Account.Query.by_email(email)
+    |> find_by(t)
+  end
+  def find_by(query, []) do
+    case Repo.one(query) do
       nil ->
         {:error, :notfound}
       account ->

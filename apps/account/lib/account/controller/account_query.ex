@@ -1,28 +1,23 @@
 defmodule Helix.Account.Controller.AccountQuery do
 
-  alias Helix.Account.Controller.AccountSetting, as: AccountSettingController
-  alias Helix.Account.Model.Account
-  alias Helix.Account.Repo
+  alias Helix.Account.Controller.AccountService
 
   def handle_query("getAccount", %{id: account_id}) do
     # FIXME: add changeset validations T420
     account_id
-    |> Account.Query.by_id()
-    |> Repo.one()
+    |> AccountService.find_account()
     |> format_get_account()
   end
 
   def handle_query("getAccount", %{username: username}) do
     # FIXME: add changeset validations T420
-    username
-    |> String.downcase()
-    |> Account.Query.by_username()
-    |> Repo.one()
+    [username: username]
+    |> AccountService.find_account_by()
     |> format_get_account()
   end
 
   def handle_query("getAccountSettings", %{id: account_id}) do
-    msg = AccountSettingController.get_settings(account_id)
+    msg = AccountService.get_account_settings(account_id)
     {:ok, msg}
   end
 
@@ -30,7 +25,7 @@ defmodule Helix.Account.Controller.AccountQuery do
     do: {:error, :invalid_query}
 
   # FIXME: add username/display_name once D59 lands
-  defp format_get_account(account = %Account{}) do
+  defp format_get_account({:ok, account}) do
     msg = %{
       account_id: account.account_id,
       username: account.username,
@@ -39,6 +34,6 @@ defmodule Helix.Account.Controller.AccountQuery do
 
     {:ok, msg}
   end
-  defp format_get_account(nil),
-    do: {:error, :notfound}
+  defp format_get_account(error),
+    do: error
 end
