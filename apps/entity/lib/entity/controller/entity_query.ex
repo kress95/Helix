@@ -1,20 +1,19 @@
 defmodule Helix.Entity.Controller.EntityQuery do
 
-  alias Helix.Entity.Model.Entity
-  alias Helix.Entity.Repo
+  alias Helix.Entity.Controller.EntityService
 
   def handle_query("getEntity", %{id: entity_id}) do
     # FIXME: add changeset validations T420
-    result =
-      entity_id
-      |> Entity.Query.by_id()
-      |> Repo.one()
+    case EntityService.find_entity(entity_id) do
+      {:ok, entity} ->
+        msg = %{
+          entity_id: entity.entity_id,
+          entity_type: entity.entity_type
+        }
 
-    case result do
-      nil ->
-        {:error, :notfound}
-      entity_type ->
-        {:ok, entity_type}
+        {:ok, msg}
+      error ->
+        error
     end
   end
 

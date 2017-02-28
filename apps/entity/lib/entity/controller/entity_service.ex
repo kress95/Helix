@@ -1,4 +1,4 @@
-defmodule Helix.Controller.EntityService do
+defmodule Helix.Entity.Controller.EntityService do
 
   use GenServer
 
@@ -30,17 +30,17 @@ defmodule Helix.Controller.EntityService do
 
     {:reply, response}
   end
-  def handle_broker_call(pid, "entity.component.list", msg, _req) do
+  def handle_broker_call(pid, "entity.component.find", msg, _req) do
     %{entity_id: entity_id} = msg
 
-    response = GenServer.call(pid, {:entity, :component, :list, entity_id})
+    response = GenServer.call(pid, {:entity, :component, :find, entity_id})
 
     {:reply, response}
   end
-  def handle_broker_call(pid, "entity.server.list", msg, _req) do
+  def handle_broker_call(pid, "entity.server.find", msg, _req) do
     %{entity_id: entity_id} = msg
 
-    response = GenServer.call(pid, {:entity, :server, :list, entity_id})
+    response = GenServer.call(pid, {:entity, :server, :find, entity_id})
 
     {:reply, response}
   end
@@ -64,8 +64,8 @@ defmodule Helix.Controller.EntityService do
   def init(_args) do
     Broker.subscribe("entity.find", call: &handle_broker_call/4)
     Broker.subscribe("entity.query", call: &handle_broker_call/4)
-    Broker.subscribe("entity.component.list", call: &handle_broker_call/4)
-    Broker.subscribe("entity.server.list", call: &handle_broker_call/4)
+    Broker.subscribe("entity.component.find", call: &handle_broker_call/4)
+    Broker.subscribe("entity.server.find", call: &handle_broker_call/4)
     Broker.subscribe("event.account.created", cast: &handle_broker_cast/4)
     Broker.subscribe("event.server.created", cast: &handle_broker_cast/4)
     Broker.subscribe("event.component.created", cast: &handle_broker_cast/4)
@@ -78,11 +78,11 @@ defmodule Helix.Controller.EntityService do
     GenServer.from,
     state) :: {:reply, {:ok, Entity.t} | {:error, :notfound}, state}
   @spec handle_call(
-    {:entity, :component, :list, PK.t},
+    {:entity, :component, :find, PK.t},
     GenServer.from,
     state) :: {:reply, {:ok, [PK.t]}, state}
   @spec handle_call(
-    {:entity, :server, :list, PK.t},
+    {:entity, :server, :find, PK.t},
     GenServer.from,
     state) :: {:reply, {:ok, [PK.t]}, state}
   @spec handle_call(
@@ -91,14 +91,14 @@ defmodule Helix.Controller.EntityService do
     state) :: {:reply, {:ok, any} | {:error, :notfound | :invalid_query}, state}
   @doc false
   def handle_call({:entity, :find, id}, _from, state) do
-    response = EntityController.find(id)
+    response = find_entity(id)
     {:reply, response, state}
   end
-  def handle_call({:entity, :component, :list, id}, _from, state) do
+  def handle_call({:entity, :component, :find, id}, _from, state) do
     component_list = EntityComponentController.find(id)
     {:reply, {:ok, component_list}, state}
   end
-  def handle_call({:entity, :server, :list, id}, _from, state) do
+  def handle_call({:entity, :server, :find, id}, _from, state) do
     server_list = EntityServerController.find(id)
     {:reply, {:ok, server_list}, state}
   end
@@ -134,4 +134,8 @@ defmodule Helix.Controller.EntityService do
     EntityComponentController.create(id, component_id)
     {:noreply, state}
   end
+
+  @spec find_entity(PK.t) :: {:ok, Entity.t} | {:error, :notfound}
+  def find_entity(entity_id),
+    do: EntityController.find(entity_id)
 end

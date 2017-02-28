@@ -27,12 +27,16 @@ defmodule Helix.Entity.Controller.EntityQueryTest do
   describe "querying getEntity" do
     test "succeeds when entity exists", context do
       entity1 = create_entity(context.entity_type)
+      expected = %{
+        entity_id: entity1.entity_id,
+        entity_type: entity1.entity_type
+      }
 
       msg = %{query: "getEntity", params: %{id: entity1.entity_id}}
 
-      {_, {:ok, entity2}} = Broker.call("entity.query", msg)
+      {_, {:ok, received}} = Broker.call("entity.query", msg)
 
-      assert entity1 == entity2
+      assert expected == received
     end
 
     test "fails when account doesn't exists" do
