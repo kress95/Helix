@@ -50,7 +50,6 @@ defmodule Helix.Hardware.Controller.HardwareService do
     {:reply, response}
   end
 
-
   def handle_broker_cast(pid, "event.server.created", msg, _) do
     %{
       entity_id: entity_id,
@@ -297,4 +296,16 @@ defmodule Helix.Hardware.Controller.HardwareService do
         err
     end
   end
+
+  @spec find_component(PK.t) :: {:ok, Component.t} | {:error, :notfound}
+  def find_component(component_id),
+    do: ComponentController.find(component_id)
+
+  @spec find_motherboard(PK.t) :: {:ok, Motherboard.t} | {:error, :notfound}
+  def find_motherboard(motherboard_id),
+    do: MotherboardController.find(motherboard_id)
+
+  @spec get_motherboard_slots(PK.t) :: [MotherboardSlot.t]
+  def get_motherboard_slots(motherboard_id),
+    do: MotherboardController.get_slots(motherboard_id)
 end

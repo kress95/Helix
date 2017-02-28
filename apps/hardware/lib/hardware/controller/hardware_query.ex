@@ -1,28 +1,28 @@
 defmodule Helix.Hardware.Controller.HardwareQuery do
 
   alias HELF.Broker
-  alias Helix.Hardware.Model.Component
-  alias Helix.Hardware.Model.MotherboardSlot
-  alias Helix.Hardware.Repo
+  alias Helix.Hardware.Controller.HardwareService
 
   def handle_query("getComponent", %{id: component_id}) do
     # FIXME: add changeset validations T420
-    result =
-      component_id
-      |> Component.Query.by_id()
-      |> Repo.one()
+    case HardwareService.find_component(component_id) do
+      {:ok, component} ->
+        msg = %{
+          component_id: component.component_id,
+          component_spec: component.component_spec,
+          component_type: component.component_type,
+          spec_id: component.spec_id
+        }
 
-    case result do
-      nil ->
-        {:error, :notfound}
-      component ->
-        {:ok, component}
+        {:ok, msg}
+      error ->
+        error
     end
   end
 
   def handle_query("listComponents", %{entity_id: entity_id}) do
     # FIXME: add changeset validations T420
-    {_, result} = Broker.call("entity.list.components", entity_id)
+    {_, result} = Broker.call("entity.component.find", entity_id)
 
     case result do
       {:ok, component_list} ->
@@ -34,11 +34,12 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
     end
   end
 
-  # FIXME: impossible to do performatically without adding
-  # component_type # to EntityComponent and indexing by
-  # [component_type, component_id].
+  # TODO:
+  # def handle_query("getMotherboard", %{server_id: server_id}) do
+  # end
+
+  # TODO: implement after adding EntityMotherboard
   #
-  # alternative method: adding EntityMotherboard
   # def handle_query("listMotherboards", %{id: entity_id}) do
   # end
 
@@ -46,8 +47,7 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
     # FIXME: add changeset validations T420
     slots =
       motherboard_id
-      |> MotherboardSlot.Query.by_motherboard_id()
-      |> Repo.all()
+      |> HardwareService.get_motherboard_slots()
       |> Enum.map(fn slot ->
         %{
           slot_id: slot.slot_id,
