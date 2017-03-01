@@ -52,8 +52,7 @@ defmodule Helix.Account.Controller.AccountSetting do
     end
   end
 
-  @spec get_settings(Account.t) :: %{Setting.id => String.t}
-  @spec get_settings(Account.id) :: %{Setting.id => String.t}
+  @spec get_settings(Account.t | Account.id) :: %{Setting.id => String.t}
   def get_settings(account = %Account{}),
     do: get_settings(account.account_id)
   def get_settings(account_id) do

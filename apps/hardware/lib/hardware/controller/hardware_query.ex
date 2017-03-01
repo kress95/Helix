@@ -34,12 +34,20 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
     end
   end
 
-  # TODO:
-  # def handle_query("getMotherboard", %{server_id: server_id}) do
-  # end
+  def handle_query("getMotherboard", %{server_id: server_id}) do
+    # FIXME: add changeset validations T420
+    # FIXME: currently unable to easily test this
+    {_, result} = Broker.call("server.motherboard", server_id)
 
-  # TODO: implement after adding EntityMotherboard
-  #
+    case result do
+      {:ok, %{motherboard_id: motherboard_id}} ->
+        HardwareService.find_motherboard(motherboard_id)
+      error ->
+        error
+    end
+  end
+
+  # TODO: implement after D66
   # def handle_query("listMotherboards", %{id: entity_id}) do
   # end
 

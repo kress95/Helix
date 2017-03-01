@@ -24,7 +24,6 @@ defmodule Helix.Account.Controller.AccountQuery do
   def handle_query(_, _),
     do: {:error, :invalid_query}
 
-  # FIXME: add username/display_name once D59 lands
   defp format_get_account({:ok, account}) do
     msg = %{
       account_id: account.account_id,

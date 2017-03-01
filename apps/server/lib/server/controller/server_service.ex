@@ -36,6 +36,11 @@ defmodule Helix.Server.Controller.ServerService do
 
     {:reply, response}
   end
+  def handle_broker_call(pid, "server.motherboard", msg, _) do
+    %{server_id: id} = msg
+    response = GenServer.call(pid, {:server, :motherboard, id})
+    {:reply, response}
+  end
   def handle_broker_call(pid, "server.hardware.resources", msg, _) do
     %{server_id: id} = msg
     response = GenServer.call(pid, {:server, :resources, id})
@@ -65,6 +70,7 @@ defmodule Helix.Server.Controller.ServerService do
     Broker.subscribe("server.attach", call: &handle_broker_call/4)
     Broker.subscribe("server.detach", call: &handle_broker_call/4)
     Broker.subscribe("server.query", call: &handle_broker_call/4)
+    Broker.subscribe("server.motherboard.find", call: &handle_broker_call/4)
     Broker.subscribe("server.hardware.resources", call: &handle_broker_call/4)
     Broker.subscribe("event.entity.created", cast: &handle_broker_cast/4)
     Broker.subscribe("event.motherboard.setup", cast: &handle_broker_cast/4)
@@ -85,6 +91,11 @@ defmodule Helix.Server.Controller.ServerService do
     {:server, :detach, Server.id},
     GenServer.from,
     state) :: {:reply, :ok | :error, state}
+  @spec handle_call(
+    {:server, :motherboard, Server.id},
+    GenServer.from,
+    state) :: {:reply, {:ok, %{server_id: PK.t, motherboard_id: PK.t}}
+              | {:error, :notfound}, state}
   @spec handle_call(
     {:server, :resources, HELL.PK.t},
     GenServer.from,
@@ -132,6 +143,19 @@ defmodule Helix.Server.Controller.ServerService do
   def handle_call({:server, :find, id}, _from, state) do
     reply = ServerController.find(id)
     {:reply, reply, state}
+  end
+  def handle_call({:server, :motherboard, id}, _from, state) do
+    case ServerController.find(id) do
+      {:ok, server} ->
+        msg = %{
+          server_id: server.server_id,
+          motherboard_id: server.motherboard_id
+        }
+
+        {:reply, {:ok, msg}, state}
+      error ->
+        {:reply, error, state}
+    end
   end
   def handle_call({:server, :resources, id}, _from, state) do
     with \
