@@ -6,6 +6,7 @@ defmodule Helix.Controller.EntityService do
   alias HELL.PK
   alias Helix.Entity.Controller.Entity, as: EntityController
   alias Helix.Entity.Controller.EntityComponent, as: EntityComponentController
+  alias Helix.Entity.Controller.EntityMotherboard, as: EntityMotherboardController
   alias Helix.Entity.Controller.EntityServer, as: EntityServerController
   alias Helix.Entity.Model.Entity
 
@@ -36,6 +37,10 @@ defmodule Helix.Controller.EntityService do
     %{entity_id: entity_id, component_id: component_id} = msg
     GenServer.cast(pid, {:entity, :component, :add, entity_id, component_id})
   end
+  def handle_broker_cast(pid, "event.motherboard.created", msg, _) do
+    %{entity_id: entity_id, motherboard_id: mobo_id} = msg
+    GenServer.cast(pid, {:entity, :motherboard, :add, entity_id, mobo_id})
+  end
 
   @spec init(any) :: {:ok, state}
   @doc false
@@ -44,6 +49,7 @@ defmodule Helix.Controller.EntityService do
     Broker.subscribe("event.account.created", cast: &handle_broker_cast/4)
     Broker.subscribe("event.server.created", cast: &handle_broker_cast/4)
     Broker.subscribe("event.component.created", cast: &handle_broker_cast/4)
+    Broker.subscribe("event.motherboard.created", cast: &handle_broker_cast/4)
 
     {:ok, nil}
   end
@@ -82,6 +88,10 @@ defmodule Helix.Controller.EntityService do
   end
   def handle_cast({:entity, :component, :add, id, component_id}, state) do
     EntityComponentController.create(id, component_id)
+    {:noreply, state}
+  end
+  def handle_cast({:entity, :motherboard, :add, id, motherboard_id}, state) do
+    EntityMotherboardController.create(id, motherboard_id)
     {:noreply, state}
   end
 end
