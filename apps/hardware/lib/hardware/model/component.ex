@@ -3,6 +3,7 @@ defmodule Helix.Hardware.Model.Component do
   use Ecto.Schema
 
   alias HELL.PK
+  alias Helix.Hardware.Model.ComponentType
   alias Helix.Hardware.Model.ComponentSpec
   alias Helix.Hardware.Model.MotherboardSlot
 
@@ -23,7 +24,10 @@ defmodule Helix.Hardware.Model.Component do
     field :component_id, HELL.PK,
       primary_key: true
 
-    field :component_type, :string
+    belongs_to :type, ComponentType,
+      foreign_key: :component_type,
+      references: :component_type,
+      type: :string
 
     belongs_to :component_spec, ComponentSpec,
       foreign_key: :spec_id,
