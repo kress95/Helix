@@ -1,20 +1,12 @@
 defmodule Helix.Server.Controller.ServerQuery do
 
   alias HELF.Broker
-  alias Helix.Server.Model.Server
-  alias Helix.Server.Repo
+  alias Helix.Server.Controller.ServerService
 
   def handle_query("getServer", %{id: server_id}) do
     # FIXME: add changeset validations T420
-    result =
-      server_id
-      |> Server.Query.by_id()
-      |> Repo.one()
-
-    case result do
-      nil ->
-        {:error, :notfound}
-      server ->
+    case ServerService.find_server(server_id) do
+      {:ok, server} ->
         msg = %{
           server_id: server.server_id,
           server_type: server.server_type,
@@ -23,6 +15,8 @@ defmodule Helix.Server.Controller.ServerQuery do
         }
 
         {:ok, msg}
+      error ->
+        error
     end
   end
 
@@ -40,7 +34,7 @@ defmodule Helix.Server.Controller.ServerQuery do
     end
   end
 
-  # TODO: add this query
+  # TODO: add this query once we define server resources
   # def handle_query("getServerResources", %{id: server_id}) do
   #   {:error, :uninplemented}
   # end

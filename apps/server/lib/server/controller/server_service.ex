@@ -152,4 +152,8 @@ defmodule Helix.Server.Controller.ServerService do
 
     {:reply, result, state}
   end
+
+  @spec find_server(PK.t) :: {:ok, Server.t} | {:error, :notfound}
+  def find_server(server_id),
+    do: ServerController.find(server_id)
 end
