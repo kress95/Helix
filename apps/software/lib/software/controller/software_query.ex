@@ -1,5 +1,7 @@
 defmodule Helix.Software.Controller.SoftwareQuery do
 
+  # TODO: when software concept is defined
+
   # def handle_query("getSoftware", %{id: software_id}) do
   # end
 
