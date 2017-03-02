@@ -1,5 +1,6 @@
 defmodule Helix.Entity.Controller.EntityQuery do
 
+  alias HELF.Broker
   alias Helix.Entity.Controller.EntityService
 
   def handle_query("getEntity", %{id: entity_id}) do
@@ -12,6 +13,21 @@ defmodule Helix.Entity.Controller.EntityQuery do
         }
 
         {:ok, msg}
+      error ->
+        error
+    end
+  end
+
+  def handle_query("listUnpluggedComponents", %{id: entity_id}) do
+    case EntityService.list_components(entity_id) do
+      {:ok, components} ->
+        components
+        |> Enum.map(&(%{component_id: &1.component_id}))
+        |> Enum.reject(fn msg ->
+          {_, {:ok, result}} = Broker.call("hardware.component.linked?", msg)
+          result.linked?
+        end)
+        |> Enum.map(&(&1.component_id))
       error ->
         error
     end

@@ -50,6 +50,13 @@ defmodule Helix.Hardware.Controller.HardwareService do
     {:reply, response}
   end
 
+  def handle_broker_call(pid, "hardware.motherboard.linked?", msg, _) do
+    %{component_id: component_id} = msg
+    response = GenServer.call(pid, {:component, :linked?, component_id})
+
+    {:reply, response}
+  end
+
   def handle_broker_call(pid, "hardware.query", msg, _) do
     %{query: name, params: params} = msg
     response = GenServer.call(pid, {:hardware, :query, name, params})
@@ -120,6 +127,10 @@ defmodule Helix.Hardware.Controller.HardwareService do
     {:motherboard, :resources, HELL.PK.t},
     GenServer.from,
     state) :: {:reply, {:ok, %{any => any}} | {:error, :notfound}, state}
+  @spec handle_call(
+    {:component, :linked?, HELL.PK.t},
+    GenServer.from,
+    state) :: {:reply, {:ok, %{linked?: boolean}}, state}
   @spec handle_call(
     {:hardware, :query, String.t, map},
     GenServer.from,
@@ -230,6 +241,11 @@ defmodule Helix.Hardware.Controller.HardwareService do
       _ ->
         {:reply, {:error, :notfound}, state}
     end
+  end
+
+  def handle_call({:component, :linked?, component_id}, _from, state) do
+    msg = %{linked?: ComponentController.linked?(component_id)}
+    {:reply, {:ok, msg}, state}
   end
 
   def handle_call({:hardware, :query, name, params}, _from, state) do

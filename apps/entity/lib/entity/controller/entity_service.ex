@@ -135,6 +135,9 @@ defmodule Helix.Entity.Controller.EntityService do
     {:noreply, state}
   end
 
+  @spec list_components(PK.t) :: {:ok, Entity.t} | {:error, :notfound}
+  def list_components(entity_id),
+    do: EntityComponentController.find(entity_id)
   @spec find_entity(PK.t) :: {:ok, Entity.t} | {:error, :notfound}
   def find_entity(entity_id),
     do: EntityController.find(entity_id)
