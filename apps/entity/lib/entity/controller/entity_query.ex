@@ -24,6 +24,8 @@ defmodule Helix.Entity.Controller.EntityQuery do
         components
         |> Enum.map(&(%{component_id: &1.component_id}))
         |> Enum.reject(fn msg ->
+          # TODO: review if this is okay, sending the component list
+          # may optimize this a lot.
           {_, {:ok, result}} = Broker.call("hardware.component.linked?", msg)
           result.linked?
         end)
