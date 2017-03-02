@@ -54,8 +54,9 @@ defmodule Helix.Hardware.Model.Component do
 
     alias HELL.PK
     alias Helix.Hardware.Model.Component
+    alias Helix.Hardware.Model.MotherboardSlot
 
-    import Ecto.Query, only: [where: 3, select: 3, preload: 2]
+    import Ecto.Query, only: [where: 3, select: 3, preload: 2, join: 5]
 
     @spec by_id(Ecto.Queryable.t, PK.t) :: Ecto.Queryable.t
     def by_id(query \\ Component, component_id),
@@ -74,6 +75,12 @@ defmodule Helix.Hardware.Model.Component do
       query
       |> preload(:slot)
       |> select([c], c.slot)
+    end
+
+    @spec inner_join_linked_component(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def inner_join_linked_component(query \\ Component) do
+      join(query, :inner, [c, ms], ms in MotherboardSlot,
+        c.component_id == ms.link_component_id)
     end
   end
 end

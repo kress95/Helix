@@ -41,6 +41,18 @@ defmodule Helix.Hardware.Controller.Component do
     end
   end
 
+  @spec linked?(Component.t | Component.id) :: boolean
+  def linked?(%Component{component_id: component_id}),
+    do: linked?(component_id)
+  def linked?(component_id) do
+    result =
+      component_id
+      |> Component.Query.by_id()
+      |> Component.Query.inner_join_linked_component()
+      |> Repo.one()
+    result != nil
+  end
+
   @spec delete(HELL.PK.t) :: no_return
   def delete(component_id) do
     component_id
