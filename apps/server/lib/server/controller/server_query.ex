@@ -20,8 +20,27 @@ defmodule Helix.Server.Controller.ServerQuery do
     end
   end
 
-  def handle_query("listServers", %{id: entity_id}) do
+  def handle_query("listPluggedComponents", %{id: server_id}) do
     # FIXME: add changeset validations T420
+    # TODO: test this query ASAP
+    with \
+      {:ok, server} <- ServerService.find_server(server_id),
+      msg = %{motherboard_id: server.motherboard_id},
+      {_, {:ok, slots}} <- Broker.call("hardware.motherboard.slots", msg)
+    do
+      components = Enum.map(slots, &(&1.link_component_id))
+      reply = %{list: components}
+
+      {:ok, reply}
+    else
+      _ ->
+        {:error, :notfound}
+    end
+  end
+
+  def handle_query("listServers", %{entity_id: entity_id}) do
+    # FIXME: add changeset validations T420
+    # TODO: test this query ASAP
     {_, result} = Broker.call("entity.list.servers", entity_id)
 
     case result do
