@@ -5,6 +5,8 @@ defmodule Helix.Hardware.Controller.ComponentTest do
   alias HELL.TestHelper.Random
   alias Helix.Hardware.Controller.ComponentSpec, as: ComponentSpecController
   alias Helix.Hardware.Controller.Component, as: ComponentController
+  alias Helix.Hardware.Controller.Motherboard, as: MotherboardController
+  alias Helix.Hardware.Controller.MotherboardSlot, as: MotherboardSlotController
   alias Helix.Hardware.Model.Component
   alias Helix.Hardware.Model.ComponentSpec
   alias Helix.Hardware.Repo
@@ -25,10 +27,23 @@ defmodule Helix.Hardware.Controller.ComponentTest do
 
         comp_spec
       cs = [_|_] ->
-        Enum.random(cs)
+        cs
+        |> Enum.reject(&(&1.component_type == "mobo"))
+        |> Enum.random()
     end
 
     {:ok, component_spec: cs}
+  end
+
+  def link_component(component) do
+    mobo_spec = Repo.get_by(ComponentSpec, spec_id: "MOBO01")
+    {:ok, mobo} = MotherboardController.create_from_spec(mobo_spec)
+
+    mobo
+    |> MotherboardController.get_slots()
+    |> Enum.filter(&(&1.link_component_type == component.component_type))
+    |> Enum.random()
+    |> MotherboardSlotController.link(component)
   end
 
   setup context do
@@ -44,6 +59,23 @@ defmodule Helix.Hardware.Controller.ComponentTest do
 
     test "fails if component doesn't exists" do
       assert {:error, :notfound} === ComponentController.find(Random.pk())
+    end
+  end
+
+  describe "checking if component is linked" do
+    test "returns true when component is linked", context do
+      component = context.component
+      link_component(component)
+
+      assert true == ComponentController.linked?(component)
+    end
+
+    test "returns false when component isn't linked", context do
+      assert false == ComponentController.linked?(context.component)
+    end
+
+    test "returns false when component doesn't exist" do
+      assert false == ComponentController.linked?(Random.pk())
     end
   end
 
