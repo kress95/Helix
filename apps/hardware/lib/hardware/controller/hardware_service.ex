@@ -43,6 +43,13 @@ defmodule Helix.Hardware.Controller.HardwareService do
     {:reply, response}
   end
 
+  def handle_broker_call(pid, "hardware.motherboard.slots", msg, _) do
+    %{motherboard_id: mid} = msg
+    response = GenServer.call(pid, {:motherboard, :slots, mid})
+
+    {:reply, response}
+  end
+
   def handle_broker_call(pid, "hardware.query", msg, _) do
     %{query: name, params: params} = msg
     response = GenServer.call(pid, {:hardware, :query, name, params})
@@ -78,6 +85,7 @@ defmodule Helix.Hardware.Controller.HardwareService do
     Broker.subscribe("hardware.component.get", call: &handle_broker_call/4)
     Broker.subscribe("hardware.motherboard.create", call: &handle_broker_call/4)
     Broker.subscribe("hardware.motherboard.resources", call: &handle_broker_call/4)
+    Broker.subscribe("hardware.motherboard.slots", call: &handle_broker_call/4)
     Broker.subscribe("hardware.query", call: &handle_broker_call/4)
     Broker.subscribe("event.server.created", cast: &handle_broker_cast/4)
 
@@ -205,6 +213,19 @@ defmodule Helix.Hardware.Controller.HardwareService do
       resources = MotherboardController.resources(mb)
 
       {:reply, {:ok, resources}, state}
+    else
+      _ ->
+        {:reply, {:error, :notfound}, state}
+    end
+  end
+
+  def handle_call({:motherboard, :slots, mib}, _from, state) do
+    with \
+      {:ok, mb} <- MotherboardController.find(mib)
+    do
+      slots = MotherboardController.get_slots(mb)
+
+      {:reply, {:ok, slots}, state}
     else
       _ ->
         {:reply, {:error, :notfound}, state}
