@@ -19,20 +19,36 @@ defmodule Helix.Entity.Controller.EntityQuery do
   end
 
   def handle_query("listUnpluggedComponents", %{id: entity_id}) do
-    case EntityService.list_components(entity_id) do
-      {:ok, components} ->
-        components
-        |> Enum.map(&(%{component_id: &1.component_id}))
-        |> Enum.reject(fn msg ->
-          # TODO: review if this is okay, sending the component list
-          # may optimize this a lot.
-          {_, {:ok, result}} = Broker.call("hardware.component.linked?", msg)
-          result.linked?
-        end)
-        |> Enum.map(&(&1.component_id))
-      error ->
-        error
-    end
+    # FIXME: add changeset validations T420
+    # TODO: test this query ASAP
+    get_motherboard_id =
+      fn server_id ->
+        req = %{server_id: server_id}
+        {_, {:ok, res}} = Broker.call("server.motherboard.fetch", req)
+
+        res.motherboard_id
+      end
+
+    get_unused_components =
+      fn component_id_list ->
+        req = %{component_id_list: component_id_list}
+        {_, {:ok, res}} = Broker.call("hardware.component.filter_unused", req)
+
+        res.component_id_list
+      end
+
+    motherboards =
+      entity_id
+      |> EntityService.list_servers()
+      |> Enum.map(get_motherboard_id)
+
+    components =
+      entity_id
+      |> EntityService.list_components()
+      |> Kernel.--(motherboards)
+      |> get_unused_components.()
+
+    {:ok, %{list: components}}
   end
 
   def handle_query(_, _),

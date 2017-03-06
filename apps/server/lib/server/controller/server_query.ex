@@ -25,14 +25,21 @@ defmodule Helix.Server.Controller.ServerQuery do
     # TODO: test this query ASAP
     with \
       {:ok, server} <- ServerService.find_server(server_id),
-      msg = %{motherboard_id: server.motherboard_id},
+      mobo_id when not is_nil(mobo_id) <- server.motherboard_id,
+      msg = %{motherboard_id: mobo_id},
       {_, {:ok, slots}} <- Broker.call("hardware.motherboard.slots", msg)
     do
-      components = Enum.map(slots, &(&1.link_component_id))
-      reply = %{list: components}
+      components =
+        slots
+        |> Enum.map(&(&1.link_component_id))
+        |> Enum.reject(&is_nil/1)
+
+      reply = %{list: [server.motherboard_id | components]}
 
       {:ok, reply}
     else
+      nil ->
+        {:ok, %{list: []}}
       _ ->
         {:error, :notfound}
     end

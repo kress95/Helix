@@ -57,6 +57,13 @@ defmodule Helix.Hardware.Controller.HardwareService do
     {:reply, response}
   end
 
+  def handle_broker_call(pid, "hardware.component.filter_unused", msg, _) do
+    %{component_id_list: list} = msg
+    response = GenServer.call(pid, {:component, :filter_unused, list})
+
+    {:reply, response}
+  end
+
   def handle_broker_call(pid, "hardware.query", msg, _) do
     %{query: name, params: params} = msg
     response = GenServer.call(pid, {:hardware, :query, name, params})
@@ -94,8 +101,8 @@ defmodule Helix.Hardware.Controller.HardwareService do
     Broker.subscribe("hardware.motherboard.resources", call: &handle_broker_call/4)
     Broker.subscribe("hardware.motherboard.slots", call: &handle_broker_call/4)
     Broker.subscribe("hardware.query", call: &handle_broker_call/4)
+    Broker.subscribe("hardware.component.filter_unused", call: &handle_broker_call/4)
     Broker.subscribe("event.server.created", cast: &handle_broker_cast/4)
-
     {:ok, nil}
   end
 
@@ -243,8 +250,10 @@ defmodule Helix.Hardware.Controller.HardwareService do
     end
   end
 
-  def handle_call({:component, :linked?, component_id}, _from, state) do
-    msg = %{linked?: ComponentController.linked?(component_id)}
+  def handle_call({:component, :filter_unused, list}, _from, state) do
+    unused_list = ComponentController.filter_unused(list)
+    msg = %{component_id_list: unused_list}
+
     {:reply, {:ok, msg}, state}
   end
 

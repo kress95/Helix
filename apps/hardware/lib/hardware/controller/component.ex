@@ -41,16 +41,13 @@ defmodule Helix.Hardware.Controller.Component do
     end
   end
 
-  @spec linked?(Component.t | Component.id) :: boolean
-  def linked?(%Component{component_id: component_id}),
-    do: linked?(component_id)
-  def linked?(component_id) do
-    result =
-      component_id
-      |> Component.Query.by_id()
-      |> Component.Query.inner_join_linked_component()
-      |> Repo.one()
-    result != nil
+  @spec filter_unused([Component.id]) :: [Component.id]
+  def filter_unused(id_list) do
+    id_list
+    |> Component.Query.by_id_list()
+    |> Component.Query.filter_unused_components()
+    |> Component.Query.select_component_id()
+    |> Repo.all()
   end
 
   @spec delete(HELL.PK.t) :: no_return

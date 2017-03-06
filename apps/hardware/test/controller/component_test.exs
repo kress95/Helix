@@ -62,20 +62,18 @@ defmodule Helix.Hardware.Controller.ComponentTest do
     end
   end
 
-  describe "checking if component is linked" do
-    test "returns true when component is linked", context do
-      component = context.component
-      link_component(component)
+  describe "filtering unused components" do
+    test "drops used components", context do
+      comp_list = [context.component.component_id]
+      link_component(context.component)
 
-      assert true == ComponentController.linked?(component)
+      assert [] == ComponentController.filter_unused(comp_list)
     end
 
-    test "returns false when component isn't linked", context do
-      assert false == ComponentController.linked?(context.component)
-    end
+    test "keeps unused components", context do
+      comp_list = [context.component.component_id]
 
-    test "returns false when component doesn't exist" do
-      assert false == ComponentController.linked?(Random.pk())
+      assert comp_list == ComponentController.filter_unused(comp_list)
     end
   end
 

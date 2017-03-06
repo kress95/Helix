@@ -36,7 +36,7 @@ defmodule Helix.Server.Controller.ServerService do
 
     {:reply, response}
   end
-  def handle_broker_call(pid, "server.motherboard", msg, _) do
+  def handle_broker_call(pid, "server.motherboard.fetch", msg, _) do
     %{server_id: id} = msg
     response = GenServer.call(pid, {:server, :motherboard, id})
     {:reply, response}
@@ -70,7 +70,7 @@ defmodule Helix.Server.Controller.ServerService do
     Broker.subscribe("server.attach", call: &handle_broker_call/4)
     Broker.subscribe("server.detach", call: &handle_broker_call/4)
     Broker.subscribe("server.query", call: &handle_broker_call/4)
-    Broker.subscribe("server.motherboard.find", call: &handle_broker_call/4)
+    Broker.subscribe("server.motherboard.fetch", call: &handle_broker_call/4)
     Broker.subscribe("server.hardware.resources", call: &handle_broker_call/4)
     Broker.subscribe("event.entity.created", cast: &handle_broker_cast/4)
     Broker.subscribe("event.motherboard.setup", cast: &handle_broker_cast/4)

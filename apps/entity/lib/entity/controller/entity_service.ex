@@ -135,9 +135,20 @@ defmodule Helix.Entity.Controller.EntityService do
     {:noreply, state}
   end
 
-  @spec list_components(PK.t) :: {:ok, Entity.t} | {:error, :notfound}
-  def list_components(entity_id),
-    do: EntityComponentController.find(entity_id)
+  @spec list_components(PK.t) :: [PK.t]
+  def list_components(entity_id) do
+    entity_id
+    |> EntityComponentController.find()
+    |> Enum.map(&(&1.component_id))
+  end
+
+  @spec list_servers(PK.t) :: [PK.t]
+  def list_servers(entity_id) do
+    entity_id
+    |> EntityServerController.find()
+    |> Enum.map(&(&1.server_id))
+  end
+
   @spec find_entity(PK.t) :: {:ok, Entity.t} | {:error, :notfound}
   def find_entity(entity_id),
     do: EntityController.find(entity_id)

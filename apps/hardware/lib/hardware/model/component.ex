@@ -62,6 +62,14 @@ defmodule Helix.Hardware.Model.Component do
     def by_id(query \\ Component, component_id),
       do: where(query, [c], c.component_id == ^component_id)
 
+    @spec by_id_list(Ecto.Queryable.t, [PK.t]) :: Ecto.Queryable.t
+    def by_id_list(query \\ Component, id_list),
+      do: where(query, [c], c.component_id in ^id_list)
+
+    @spec select_component_id(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def select_component_id(query \\ Component),
+      do: select(query, [c], c.component_id)
+
     @spec select_component_type(Ecto.Queryable.t) :: Ecto.Queryable.t
     def select_component_type(query \\ Component),
       do: select(query, [c], c.component_type)
@@ -77,10 +85,12 @@ defmodule Helix.Hardware.Model.Component do
       |> select([c], c.slot)
     end
 
-    @spec inner_join_linked_component(Ecto.Queryable.t) :: Ecto.Queryable.t
-    def inner_join_linked_component(query \\ Component) do
-      join(query, :inner, [c, ms], ms in MotherboardSlot,
+    @spec filter_unused_components(Ecto.Queryable.t) :: Ecto.Queryable.t
+    def filter_unused_components(query \\ Component) do
+      query
+      |> join(:left, [c], ms in MotherboardSlot,
         c.component_id == ms.link_component_id)
+      |> where([c, ms], is_nil(ms.link_component_id))
     end
   end
 end

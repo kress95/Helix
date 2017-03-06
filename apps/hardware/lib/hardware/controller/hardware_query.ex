@@ -37,7 +37,7 @@ defmodule Helix.Hardware.Controller.HardwareQuery do
   def handle_query("getMotherboard", %{server_id: server_id}) do
     # FIXME: add changeset validations T420
     # FIXME: currently unable to easily test this
-    {_, result} = Broker.call("server.motherboard", server_id)
+    {_, result} = Broker.call("server.motherboard.fetch", server_id)
 
     case result do
       {:ok, %{motherboard_id: motherboard_id}} ->
