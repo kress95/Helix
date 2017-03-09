@@ -22,7 +22,7 @@ defmodule Helix.Hardware.Controller.MotherboardSlot do
 
   @spec link(MotherboardSlot.t, Component.t) ::
     {:ok, MotherboardSlot.t}
-    | {:error, :component_already_linked | :slot_already_linked | Ecto.Changeset.t}
+    | {:error, :component_already_linked | :slot_already_linked | :notfound, Ecto.Changeset.t}
   def link(slot, component) do
     slot_linked? = fn slot ->
       MotherboardSlot.linked?(slot) && {:error, :slot_already_linked}
@@ -33,6 +33,7 @@ defmodule Helix.Hardware.Controller.MotherboardSlot do
     end
 
     with \
+      {:ok, slot} <- find(slot.slot_id),
       false <- slot_linked?.(slot),
       false <- component_used?.(component)
     do
