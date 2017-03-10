@@ -143,11 +143,11 @@ defmodule Helix.Hardware.Factory do
     %Component{
       component_type: type,
       component_id: pk,
-      component_spec: build(:spec)
+      component_spec: build(:component_spec)
     }
   end
 
-  def spec_factory do
+  def component_spec_factory do
     case random_component_type() do
       "cpu" ->
         cpu_spec_factory()
