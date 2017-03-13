@@ -28,7 +28,7 @@ defmodule Helix.Hardware.Model.MotherboardSlot do
     :slot_internal_id => integer,
     optional(:link_component_id) => PK.t
   }
-  @type update_params :: %{link_component_id: PK.t}
+  @type update_params :: %{link_component_id: PK.t | nil}
 
   @creation_fields ~w/
     motherboard_id
