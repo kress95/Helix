@@ -20,6 +20,7 @@ defmodule Helix.Process.Controller.TableOfProcesses do
 
   @type server_id :: String.t
   @type timer :: {DateTime.t, tref :: reference} | nil
+  @typep process :: process | %Ecto.Changeset{data: ProcessModel.t}
 
   # 3 minutes to hibernate the process
   @hibernate_after 3 * 60 * 1_000
@@ -71,9 +72,9 @@ defmodule Helix.Process.Controller.TableOfProcesses do
   def resources(pid, resources),
     do: GenServer.cast(pid, {:resources, resources})
 
-  @spec apply_update([Ecto.Changeset.t]) :: ProcessModel.t
-  @spec apply_update(
-    {:update_and_delete, [Ecto.Changeset.t], [ProcessModel.t]}) :: ProcessModel.t
+  @spec apply_update([process]) :: [process]
+  @spec apply_update({:update_and_delete, [process], [process]}) ::
+    [process]
   docp """
   Asynchronously stores the changes from `changeset_list` into the database and
   immediately returns all the changesets applied as models
@@ -114,7 +115,7 @@ defmodule Helix.Process.Controller.TableOfProcesses do
     end
   end
 
-  @spec request_server_processes(server_id) :: {:ok, [ProcessModel.t]} | {:error, reason :: term}
+  @spec request_server_processes(server_id) :: {:ok, [ProcessModel.t]}
   docp """
   Fetches the list of in-game processes running on this server
   """
@@ -354,8 +355,10 @@ defmodule Helix.Process.Controller.TableOfProcesses do
   Traverses the table of process and updates the timer to notify the process
   when the next estimated change will happen.
   """
-  defp update_timer([], timer),
-    do: stop_timer(timer)
+  defp update_timer([], timer) do
+    stop_timer(timer)
+    timer
+  end
   defp update_timer(processes, timer) do
     stop_timer(timer)
 

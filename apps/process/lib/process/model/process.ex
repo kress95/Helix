@@ -139,7 +139,7 @@ defmodule Helix.Process.Model.Process do
       optional(:priority) => 0..5,
       optional(:creation_time) => DateTime.t,
       optional(:updated_time) => DateTime.t,
-      optional(:estimated_time) => DateTime.t,
+      optional(:estimated_time) => DateTime.t | nil,
       optional(:limitations) => %{},
       optional(:objective) => %{},
       optional(:processed) => %{},
