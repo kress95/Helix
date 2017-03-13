@@ -8,6 +8,15 @@ defmodule Helix.Log.Model.Revision do
 
   import Ecto.Changeset
 
+  @type t :: %__MODULE__{
+    revision_id: PK.t,
+    entity_id: PK.t,
+    log_id: PK.t,
+    message: String.t,
+    forge_version: non_neg_integer,
+    log: Log.t
+  }
+
   @creation_fields ~w/entity_id message forge_version log_id/a
 
   @primary_key false
