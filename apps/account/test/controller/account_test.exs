@@ -3,17 +3,15 @@ defmodule Helix.Account.Controller.AccountTest do
   use ExUnit.Case, async: true
 
   alias Comeonin.Bcrypt
-  alias HELL.TestHelper.Random
   alias Helix.Account.Controller.Account, as: AccountController
   alias Helix.Account.Model.Account
   alias Helix.Account.Repo
 
   alias Helix.Account.Factory
 
-  describe "account creation" do
+  describe "creating" do
     test "succeeds with valid params" do
       params = Factory.params_for(:account)
-
       assert {:ok, _} = AccountController.create(params)
     end
 
@@ -41,38 +39,35 @@ defmodule Helix.Account.Controller.AccountTest do
     end
   end
 
-  describe "account fetching" do
-    test "succeeds by id" do
+  describe "fetching" do
+    test "returns a record based on its identification" do
       account = Factory.insert(:account)
-
-      assert {:ok, found} = AccountController.find(account.account_id)
-      assert account.account_id == found.account_id
+      assert %Account{} = AccountController.fetch(account.account_id)
     end
 
-    test "succeeds by email" do
+    test "returns a record based on its username" do
       account = Factory.insert(:account)
-
-      assert [found] = AccountController.find_by(email: account.email)
-      assert account.account_id == found.account_id
+      assert %Account{} = AccountController.fetch_by_username(account.username)
     end
 
-    test "succeeds by username" do
+    test "returns a record based on its email" do
       account = Factory.insert(:account)
-
-      assert [found] = AccountController.find_by(username: account.username)
-      assert account.account_id == found.account_id
+      assert %Account{} = AccountController.fetch_by_email(account.email)
     end
 
-    test "returns empty list when email isn't in use" do
-      assert [] == AccountController.find_by(email: "a@bc.com")
+    test "returns nil if account with id doesn't exists" do
+      bogus = Factory.build(:account)
+      refute AccountController.fetch(bogus.account_id)
     end
 
-    test "returns empty list when username isn't in use" do
-      assert [] == AccountController.find_by(username: "abcdef")
+    test "returns nil if account with username doesn't exists" do
+      bogus = Factory.build(:account)
+      refute AccountController.fetch_by_username(bogus.username)
     end
 
-    test "fails when account doesn't exist" do
-      assert {:error, :notfound} == AccountController.find(Random.pk())
+    test "returns nil if account with email doesn't exists" do
+      bogus = Factory.build(:account)
+      refute AccountController.fetch_by_email(bogus.email)
     end
   end
 
