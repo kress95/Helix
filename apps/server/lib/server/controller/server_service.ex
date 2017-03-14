@@ -31,7 +31,7 @@ defmodule Helix.Server.Controller.ServerService do
   end
   def handle_broker_call(pid, "server.query", msg, _) do
     %{server_id: id} = msg
-    response = GenServer.call(pid, {:server, :find, id})
+    response = GenServer.call(pid, {:server, :fetch, id})
     {:reply, response}
   end
   def handle_broker_call(pid, "server.hardware.resources", msg, _) do
@@ -127,13 +127,13 @@ defmodule Helix.Server.Controller.ServerService do
         {:reply, :error, state}
     end
   end
-  def handle_call({:server, :find, id}, _from, state) do
-    reply = ServerController.find(id)
+  def handle_call({:server, :fetch, id}, _from, state) do
+    reply = ServerController.fetch(id)
     {:reply, reply, state}
   end
   def handle_call({:server, :resources, id}, _from, state) do
     with \
-      {:ok, server} <- ServerController.find(id),
+      server = %Server{} <- ServerController.fetch(id),
       %{motherboard_id: mib} when not is_nil(mib) <- server,
       msg = %{motherboard_id: mib},
       topic = "hardware.motherboard.resources",

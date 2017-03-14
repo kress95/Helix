@@ -13,23 +13,15 @@ defmodule Helix.Server.Controller.Server do
     |> Repo.insert()
   end
 
-  @spec find(HELL.PK.t) :: {:ok, Server.t} | {:error, :notfound}
-  def find(server_id) do
-    case Repo.get_by(Server, server_id: server_id) do
-      nil ->
-        {:error, :notfound}
-      server ->
-      {:ok, server}
-    end
-  end
+  @spec fetch(HELL.PK.t) :: Server.t | nil
+  def fetch(server_id),
+    do: Repo.get_by(Server, server_id)
 
-  @spec update(HELL.PK.t, Server.update_params) :: {:ok, Server.t} | {:error, :notfound | Ecto.Changeset.t}
-  def update(server_id, params) do
-    with {:ok, server} <- find(server_id) do
-      server
-      |> Server.update_changeset(params)
-      |> Repo.update()
-    end
+  @spec update(Server.t, Server.update_params) :: {:ok, Server.t} | {:error, Ecto.Changeset.t}
+  def update(server, params) do
+    server
+    |> Server.update_changeset(params)
+    |> Repo.update()
   end
 
   @spec delete(HELL.PK.t) :: no_return
@@ -41,10 +33,9 @@ defmodule Helix.Server.Controller.Server do
     :ok
   end
 
-  @spec attach(server :: HELL.PK.t, motherboard :: HELL.PK.t) :: {:ok, Server.t} | {:error, reason :: term}
-  def attach(server_id, mobo_id) do
+  @spec attach(Server.t, motherboard :: HELL.PK.t) :: {:ok, Server.t} | {:error, reason :: term}
+  def attach(server, mobo_id) do
     with \
-      {:ok, server} <- find(server_id),
       msg = %{component_type: :motherboard, component_id: mobo_id},
       {_, {:ok, _}} <- Broker.call("hardware.component.get", msg)
     do
@@ -54,12 +45,10 @@ defmodule Helix.Server.Controller.Server do
     end
   end
 
-  @spec detach(HELL.PK.t) :: {:ok, Server.t} | {:error, Ecto.Changeset.t} | {:error, :notfound}
-  def detach(server_id) do
-    with {:ok, server} <- find(server_id) do
-      server
-      |> Server.update_changeset(%{motherboard_id: nil})
-      |> Repo.update()
-    end
+  @spec detach(Server.t) :: {:ok, Server.t} | {:error, Ecto.Changeset.t}
+  def detach(server) do
+    server
+    |> Server.update_changeset(%{motherboard_id: nil})
+    |> Repo.update()
   end
 end
