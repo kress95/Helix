@@ -15,7 +15,7 @@ defmodule Helix.Server.Controller.Server do
 
   @spec fetch(HELL.PK.t) :: Server.t | nil
   def fetch(server_id),
-    do: Repo.get_by(Server, server_id)
+    do: Repo.get(Server, server_id)
 
   @spec update(Server.t, Server.update_params) :: {:ok, Server.t} | {:error, Ecto.Changeset.t}
   def update(server, params) do

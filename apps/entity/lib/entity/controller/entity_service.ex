@@ -54,7 +54,7 @@ defmodule Helix.Controller.EntityService do
     state) :: {:reply, {:ok, Entity.t} | {:error, :notfound}, state}
   @doc false
   def handle_call({:entity, :find, id}, _from, state) do
-    response = EntityController.find(id)
+    response = EntityController.fetch(id)
     {:reply, response, state}
   end
 

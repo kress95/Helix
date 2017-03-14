@@ -15,8 +15,8 @@ defmodule Helix.Entity.Controller.EntityComponent do
     |> Repo.insert()
   end
 
-  @spec find(Entity.id) :: [EntityComponent.t]
-  def find(entity_id) do
+  @spec fetch(Entity.id) :: [EntityComponent.t]
+  def fetch(entity_id) do
     EntityComponent
     |> where([s], s.entity_id == ^entity_id)
     |> Repo.all()

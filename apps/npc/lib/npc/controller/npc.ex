@@ -14,7 +14,7 @@ defmodule Helix.NPC.Controller.NPC do
 
   @spec fetch(HELL.PK.t) :: NPC.t | nil
   def fetch(npc_id),
-    do: Repo.get_by(NPC, npc_id: npc_id)
+    do: Repo.get(NPC, npc_id)
 
   @spec delete(HELL.PK.t) :: no_return
   def delete(npc_id) do
