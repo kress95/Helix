@@ -10,12 +10,8 @@ defmodule Helix.Process.Controller.Process do
     |> Repo.insert()
   end
 
-  def find(process_id) do
-    case Repo.get(ProcessModel, process_id) do
-      nil -> {:error, :notfound}
-      process -> {:ok, process}
-    end
-  end
+  def fetch(process_id),
+    do: Repo.get(ProcessModel, process_id)
 
   def delete(process_id) do
     ProcessModel
