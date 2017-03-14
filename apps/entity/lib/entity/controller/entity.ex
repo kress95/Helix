@@ -12,15 +12,9 @@ defmodule Helix.Entity.Controller.Entity do
     |> Repo.insert()
   end
 
-  @spec find(Entity.id) :: {:ok, Entity.t} | {:error, :notfound}
-  def find(entity_id) do
-    case Repo.get_by(Entity, entity_id: entity_id) do
-      nil ->
-        {:error, :notfound}
-      entity ->
-        {:ok, entity}
-    end
-  end
+  @spec fetch(Entity.id) :: Entity.t | nil
+  def fetch(entity_id),
+    do: Repo.get_by(Entity, entity_id: entity_id)
 
   @spec delete(Entity.id) :: no_return
   def delete(entity_id) do
