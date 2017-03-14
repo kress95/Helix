@@ -3,15 +3,9 @@ defmodule Helix.Hardware.Controller.MotherboardSlot do
   alias Helix.Hardware.Model.MotherboardSlot
   alias Helix.Hardware.Repo
 
-  @spec find(HELL.PK.t) :: {:ok, MotherboardSlot.t} | {:error, :notfound}
-  def find(slot_id) do
-    case Repo.get_by(MotherboardSlot, slot_id: slot_id) do
-      nil ->
-        {:error, :notfound}
-      res ->
-        {:ok, res}
-    end
-  end
+  @spec fetch(HELL.PK.t) :: MotherboardSlot.t | nil
+  def fetch(slot_id),
+    do: Repo.get(MotherboardSlot, slot_id)
 
   @spec update(MotherboardSlot.t, MotherboardSlot.update_params) :: {:ok, MotherboardSlot.t} | {:error, Ecto.Changeset.t}
   def update(slot, params) do

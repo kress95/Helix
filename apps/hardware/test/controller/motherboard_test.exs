@@ -4,19 +4,19 @@ defmodule Helix.Hardware.Controller.MotherboardTest do
 
   alias Helix.Hardware.Controller.Motherboard, as: MotherboardController
   alias Helix.Hardware.Controller.MotherboardSlot, as: MotherboardSlotController
+  alias Helix.Hardware.Model.Motherboard
 
   alias Helix.Hardware.Factory
 
   describe "motherboard fetching" do
     test "succeeds by id" do
       mobo = Factory.insert(:motherboard)
-      assert {:ok, _} = MotherboardController.find(mobo.motherboard_id)
+      assert %Motherboard{} = MotherboardController.fetch(mobo.motherboard_id)
     end
 
     test "fails when motherboard doesn't exists" do
       mobo = Factory.build(:motherboard)
-      assert {:error, :notfound} ==
-        MotherboardController.find(mobo.motherboard_id)
+      refute MotherboardController.fetch(mobo.motherboard_id)
     end
   end
 
@@ -46,13 +46,12 @@ defmodule Helix.Hardware.Controller.MotherboardTest do
     test "is idempotent" do
       mobo = Factory.insert(:motherboard)
 
-      assert {:ok, _} = MotherboardController.find(mobo.motherboard_id)
+      assert %Motherboard{} = MotherboardController.fetch(mobo.motherboard_id)
 
       MotherboardController.delete(mobo.motherboard_id)
       MotherboardController.delete(mobo.motherboard_id)
 
-      assert {:error, :notfound} ==
-        MotherboardController.find(mobo.motherboard_id)
+      refute MotherboardController.fetch(mobo.motherboard_id)
     end
 
     test "removes its slots" do

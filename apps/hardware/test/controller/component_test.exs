@@ -11,12 +11,12 @@ defmodule Helix.Hardware.Controller.ComponentTest do
   describe "fetching component" do
     test "succeeds by id" do
       c = Factory.insert(:component)
-      assert {:ok, _} = ComponentController.find(c.component_id)
+      assert %Component{} = ComponentController.fetch(c.component_id)
     end
 
     test "fails when component doesn't exists" do
       c = Factory.build(:component)
-      assert {:error, :notfound} == ComponentController.find(c.component_id)
+      refute ComponentController.fetch(c.component_id)
     end
   end
 

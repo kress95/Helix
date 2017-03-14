@@ -31,15 +31,9 @@ defmodule Helix.Hardware.Controller.Component do
     end
   end
 
-  @spec find(HELL.PK.t) :: {:ok, Component.t} | {:error, :notfound}
-  def find(component_id) do
-    case Repo.get_by(Component, component_id: component_id) do
-      nil ->
-        {:error, :notfound}
-      res ->
-        {:ok, res}
-    end
-  end
+  @spec fetch(HELL.PK.t) :: Component.t | nil
+  def fetch(component_id),
+    do: Repo.get(Component, component_id)
 
   @spec delete(HELL.PK.t) :: no_return
   def delete(component_id) do

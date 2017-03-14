@@ -10,15 +10,9 @@ defmodule Helix.Hardware.Controller.ComponentSpec do
     |> Repo.insert()
   end
 
-  @spec find(String.t) :: {:ok, ComponentSpec.t} | {:error, :notfound}
-  def find(spec_id) do
-    case Repo.get_by(ComponentSpec, spec_id: spec_id) do
-      nil ->
-        {:error, :notfound}
-      res ->
-        {:ok, res}
-    end
-  end
+  @spec fetch(String.t) :: ComponentSpec.t | nil
+  def fetch(spec_id),
+    do: Repo.get(ComponentSpec, spec_id)
 
   @spec update(ComponentSpec.t, ComponentSpec.update_params) :: {:ok, ComponentSpec.t} | {:error, Ecto.Changeset.t}
   def update(component_spec, params) do

@@ -9,6 +9,7 @@ defmodule Helix.Hardware.Controller.HardwareService do
   alias Helix.Hardware.Controller.MotherboardSlot, as: MotherboardSlotController
   alias Helix.Hardware.Model.Component
   alias Helix.Hardware.Model.ComponentSpec
+  alias Helix.Hardware.Model.Motherboard
   alias Helix.Hardware.Model.MotherboardSlot
   alias Helix.Hardware.Repo
 
@@ -82,31 +83,31 @@ defmodule Helix.Hardware.Controller.HardwareService do
   @spec handle_call(
     {:motherboard, :get, HELL.PK.t},
     GenServer.from,
-    state) :: {:reply, {:ok, Motherboard.t} | {:error, :notfound}, state}
+    state) :: {:reply, Motherboard.t | nil, state}
   @spec handle_call(
     {:motherboard_slot, :get, HELL.PK.t},
     GenServer.from,
-    state) :: {:reply, {:ok, MotherboardSlot.t} | {:error, :notfound}, state}
+    state) :: {:reply, MotherboardSlot.t | nil, state}
   @spec handle_call(
     {:component, :get, HELL.PK.t},
     GenServer.from,
-    state) :: {:reply, {:ok, Component.t} | {:error, :notfound}, state}
+    state) :: {:reply, Component.t | nil, state}
   @spec handle_call(
     {:component_spec, :get, HELL.PK.t},
     GenServer.from,
-    state) :: {:reply, {:ok, ComponentSpec.t} | {:error, :notfound}, state}
+    state) :: {:reply, ComponentSpec.t | nil, state}
   @spec handle_call(
     {:setup, HELL.PK.t, %{motherboard: String.t, components: [{String.t, String.t}]}},
     GenServer.from,
-    state) :: {:reply, {:ok, Motherboard.t} | {:error, :internal_error}, state}
+    state) :: {:reply, Motherboard.t | nil, state}
   @spec handle_call(
     {:motherboard, :resources, HELL.PK.t},
     GenServer.from,
-    state) :: {:reply, {:ok, %{any => any}} | {:error, :notfound}, state}
+    state) :: {:reply, %{any => any} | nil, state}
   @doc false
   def handle_call({:motherboard, :create, {:component_spec, :id, spec_id}}, _from, state) do
     with \
-      {:ok, cs} <- ComponentSpecController.find(spec_id),
+      cs = %ComponentSpec{} <- ComponentSpecController.fetch(spec_id),
       {:ok, mobo} <- MotherboardController.create_from_spec(cs)
     do
       message = %{motherboard_id: mobo.motherboard_id}
@@ -121,22 +122,22 @@ defmodule Helix.Hardware.Controller.HardwareService do
   end
 
   def handle_call({:motherboard, :get, id}, _from, state) do
-    response = MotherboardController.find(id)
+    response = MotherboardController.fetch(id)
     {:reply, response, state}
   end
 
   def handle_call({:motherboard_slot, :get, id}, _from, state) do
-    response = MotherboardSlotController.find(id)
+    response = MotherboardSlotController.fetch(id)
     {:reply, response, state}
   end
 
   def handle_call({:component, :get, id}, _from, state) do
-    response = ComponentController.find(id)
+    response = ComponentController.fetch(id)
     {:reply, response, state}
   end
 
   def handle_call({:component_spec, :get, id}, _from, state) do
-    response = ComponentSpecController.find(id)
+    response = ComponentSpecController.fetch(id)
     {:reply, response, state}
   end
 
@@ -186,15 +187,13 @@ defmodule Helix.Hardware.Controller.HardwareService do
   end
 
   def handle_call({:motherboard, :resources, mib}, _from, state) do
-    with \
-      {:ok, mb} <- MotherboardController.find(mib)
-    do
-      resources = MotherboardController.resources(mb)
+    case MotherboardController.fetch(mib) do
+      motherboard = %Motherboard{} ->
+        resources = MotherboardController.resources(motherboard)
 
-      {:reply, {:ok, resources}, state}
-    else
-      _ ->
-        {:reply, {:error, :notfound}, state}
+        {:reply, {:ok, resources}, state}
+      error ->
+        {:reply, error, state}
     end
   end
 
@@ -203,7 +202,7 @@ defmodule Helix.Hardware.Controller.HardwareService do
     | {:error, Ecto.Changeset.t}
   defp create_motherboard(spec_id, entity_id) do
     with \
-      {:ok, cs} <- ComponentSpecController.find(spec_id),
+      cs = %ComponentSpec{} <- ComponentSpecController.fetch(spec_id),
       {:ok, motherboard} <- MotherboardController.create_from_spec(cs)
     do
       msg_motherboard = %{

@@ -46,11 +46,17 @@ defmodule Helix.Server.Controller.Server do
     with \
       {:ok, server} <- find(server_id),
       msg = %{component_type: :motherboard, component_id: mobo_id},
-      {_, {:ok, _}} <- Broker.call("hardware.component.get", msg)
+      {_, component} <- Broker.call("hardware.component.get", msg),
+      component when is_map(component) <- component
     do
       server
       |> Server.update_changeset(%{motherboard_id: mobo_id})
       |> Repo.update()
+    else
+      nil ->
+        {:error, :notfound}
+      error ->
+        error
     end
   end
 

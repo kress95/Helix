@@ -3,6 +3,7 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
   use ExUnit.Case, async: true
 
   alias Helix.Hardware.Controller.MotherboardSlot, as: MotherboardSlotController
+  alias Helix.Hardware.Model.MotherboardSlot
 
   alias Helix.Hardware.Factory
 
@@ -15,13 +16,12 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
   describe "motherboard slot fetching" do
     test "succeeds by id" do
       slot = Factory.insert(:motherboard_slot)
-      assert {:ok, _} = MotherboardSlotController.find(slot.slot_id)
+      assert %MotherboardSlot{} = MotherboardSlotController.fetch(slot.slot_id)
     end
 
     test "fails when motherboard slot doesn't exist" do
       slot = Factory.build(:motherboard_slot)
-
-      assert {:error, :notfound} == MotherboardSlotController.find(slot.slot_id)
+      refute MotherboardSlotController.fetch(slot.slot_id)
     end
   end
 
@@ -82,7 +82,7 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
     assert {:ok, _} = MotherboardSlotController.unlink(slot)
     assert {:ok, _} = MotherboardSlotController.unlink(slot)
 
-    {:ok, slot} = MotherboardSlotController.find(slot.slot_id)
+    slot = MotherboardSlotController.fetch(slot.slot_id)
 
     refute slot.link_component_id
   end

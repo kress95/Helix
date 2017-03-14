@@ -4,7 +4,10 @@ defmodule Helix.Hardware.Controller.HardwareServiceTest do
 
   alias HELF.Broker
   alias HELL.TestHelper.Random
+  alias Helix.Entity.Controller.EntityServer, as: EntityServerController
   alias Helix.Hardware.Controller.Motherboard, as: MotherboardController
+  alias Helix.Server.Controller.Server, as: ServerController
+  alias Helix.Hardware.Model.Motherboard
   alias Helix.Hardware.Model.MotherboardSlot
 
   @moduletag :umbrella
@@ -17,7 +20,6 @@ defmodule Helix.Hardware.Controller.HardwareServiceTest do
     params = %{
       username: name,
       email: email,
-      password_confirmation: password,
       password: password
     }
 
@@ -30,17 +32,16 @@ defmodule Helix.Hardware.Controller.HardwareServiceTest do
   end
 
   # HACK: this method is calling methods from another domain instead of Broker
-  defp motherboard_of_account(account_id) do
+  defp motherboard_of_account(id) do
     # entity has a list of servers
     with \
-      [entity_server] <- Helix.Entity.Controller.EntityServer.find(account_id),
-      {:ok, server} <- Helix.Server.Controller.Server.find(entity_server.server_id),
-      {:ok, motherboard} <- Helix.Hardware.Controller.Motherboard.find(server.motherboard_id)
+      [entity_server] <- EntityServerController.find(id),
+      {:ok, server} <- ServerController.find(entity_server.server_id)
     do
-      {:ok, motherboard}
+      MotherboardController.fetch(server.motherboard_id)
     else
       _ ->
-        {:error, :not_found}
+        nil
     end
   end
 
@@ -51,7 +52,7 @@ defmodule Helix.Hardware.Controller.HardwareServiceTest do
       # TODO: removing this sleep depends on T412
       :timer.sleep(200)
 
-      assert {:ok, _} = motherboard_of_account(account.account_id)
+      assert %Motherboard{} = motherboard_of_account(account.account_id)
     end
 
     test "motherboard slots are created" do
@@ -60,7 +61,7 @@ defmodule Helix.Hardware.Controller.HardwareServiceTest do
       # TODO: removing this sleep depends on T412
       :timer.sleep(200)
 
-      {:ok, motherboard} = motherboard_of_account(account.account_id)
+      motherboard = motherboard_of_account(account.account_id)
       slots = MotherboardController.get_slots(motherboard)
 
       refute Enum.empty?(slots)
@@ -72,7 +73,7 @@ defmodule Helix.Hardware.Controller.HardwareServiceTest do
       # TODO: removing this sleep depends on T412
       :timer.sleep(200)
 
-      {:ok, motherboard} = motherboard_of_account(account.account_id)
+      motherboard = motherboard_of_account(account.account_id)
       slots = MotherboardController.get_slots(motherboard)
 
        possible_types = MapSet.new(slots, &(&1.link_component_type))
