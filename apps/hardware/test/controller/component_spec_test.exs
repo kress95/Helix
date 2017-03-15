@@ -2,7 +2,6 @@ defmodule Helix.Hardware.Controller.ComponentSpecTest do
 
   use ExUnit.Case, async: true
 
-  alias HELL.TestHelper.Random
   alias Helix.Hardware.Controller.ComponentSpec, as: ComponentSpecController
   alias Helix.Hardware.Model.ComponentSpec
   alias Helix.Hardware.Repo
@@ -12,11 +11,14 @@ defmodule Helix.Hardware.Controller.ComponentSpecTest do
   describe "fetching component_spec" do
     test "succeeds by id" do
       cs = Factory.insert(:component_spec)
-      assert {:ok, _} = ComponentSpecController.find(cs.spec_id)
+
+      assert {:ok, found} = ComponentSpecController.find(cs.spec_id)
+      assert cs.spec_id == found.spec_id
     end
 
     test "fails when spec doesn't exists" do
-      assert {:error, :notfound} === ComponentSpecController.find(Random.pk())
+      cs = Factory.build(:component_spec)
+      assert {:error, :notfound} == ComponentSpecController.find(cs.spec_id)
     end
   end
 
@@ -26,7 +28,7 @@ defmodule Helix.Hardware.Controller.ComponentSpecTest do
 
     {:ok, cs} = ComponentSpecController.update(cs, update_params)
 
-    assert update_params.spec === cs.spec
+    assert update_params.spec == cs.spec
   end
 
   describe "deleting component_spec" do

@@ -14,19 +14,16 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
 
   describe "motherboard slot fetching" do
     test "succeeds by id" do
-      mobo = Factory.insert(:motherboard)
-      slot = Enum.random(mobo.slots)
+      slot = Factory.insert(:motherboard_slot)
 
       assert {:ok, found} = MotherboardSlotController.find(slot.slot_id)
       assert slot.slot_id == found.slot_id
     end
 
     test "fails when motherboard slot doesn't exist" do
-      mobo = Factory.build(:motherboard)
-      slot = Enum.random(mobo.slots)
+      slot = Factory.build(:motherboard_slot)
 
-      assert {:error, :notfound} ==
-        MotherboardSlotController.find(slot.slot_id)
+      assert {:error, :notfound} == MotherboardSlotController.find(slot.slot_id)
     end
   end
 
@@ -39,7 +36,7 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
         |> slot_for(component)
 
       {:ok, slot} = MotherboardSlotController.link(slot, component)
-      assert component.component_id === slot.link_component_id
+      assert component.component_id == slot.link_component_id
     end
 
     test "fails when slot is already in use" do
