@@ -8,26 +8,30 @@ defmodule Helix.Hardware.Controller.MotherboardTest do
 
   alias Helix.Hardware.Factory
 
-  describe "find" do
-    test "fetching the model by it's id" do
+  describe "motherboard fetching" do
+    test "succeeds by id" do
       mobo = Factory.insert(:motherboard)
-      {:ok, found} = MotherboardController.find(mobo.motherboard_id)
 
+      assert {:ok, found} = MotherboardController.find(mobo.motherboard_id)
       assert mobo.motherboard_id === found.motherboard_id
     end
 
-    test "returns error when motherboard doesn't exists" do
+    test "fails when motherboard doesn't exists" do
       assert {:error, :notfound} === MotherboardController.find(Random.pk())
     end
   end
 
-  test "unlinking every linked component from a motherboard" do
+  test "unlinking every component from a motherboard" do
     mobo = Factory.insert(:motherboard)
 
     mobo.slots
     |> Enum.take_random(3)
-    |> Enum.each(&MotherboardSlotController.link(&1,
-      Factory.component_of_type(&1.link_component_type)))
+    |> Enum.each(fn slot ->
+      type = slot.link_component_type
+      component = Factory.component_of_type(type)
+
+      MotherboardSlotController.link(slot, component)
+    end)
 
     MotherboardController.unlink_components_from_motherboard(mobo)
 
@@ -39,7 +43,7 @@ defmodule Helix.Hardware.Controller.MotherboardTest do
     assert [] == non_empty_slots
   end
 
-  describe "delete" do
+  describe "motherboard deleting" do
     test "is idempotent" do
       mobo = Factory.insert(:motherboard)
 
@@ -52,7 +56,7 @@ defmodule Helix.Hardware.Controller.MotherboardTest do
         MotherboardController.find(mobo.motherboard_id)
     end
 
-    test "removes every slot" do
+    test "removes its slots" do
       mobo = Factory.insert(:motherboard)
 
       refute [] === MotherboardController.get_slots(mobo.motherboard_id)

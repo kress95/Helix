@@ -12,23 +12,26 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
     |> Enum.random()
   end
 
-  describe "find" do
-    test "fetching a slot by it's id" do
+  describe "motherboard slot fetching" do
+    test "succeeds by id" do
       mobo = Factory.insert(:motherboard)
       slot = Enum.random(mobo.slots)
-      assert {:ok, _} = MotherboardSlotController.find(slot.slot_id)
+
+      assert {:ok, found} = MotherboardSlotController.find(slot.slot_id)
+      assert slot.slot_id == found.slot_id
     end
 
-    test "failure to retrieve a slot when it doesn't exists" do
+    test "fails when motherboard slot doesn't exist" do
       mobo = Factory.build(:motherboard)
       slot = Enum.random(mobo.slots)
+
       assert {:error, :notfound} ==
         MotherboardSlotController.find(slot.slot_id)
     end
   end
 
-  describe "link" do
-    test "connecting a component into slot" do
+  describe "motherboard slot linking" do
+    test "links a component to slot" do
       component = Factory.insert(:component)
       slot =
         :motherboard
@@ -39,7 +42,7 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
       assert component.component_id === slot.link_component_id
     end
 
-    test "failure when slot is already used" do
+    test "fails when slot is already in use" do
       cpu1 = Factory.insert(:cpu)
       cpu2 = Factory.insert(:cpu)
       slot =
@@ -47,13 +50,13 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
         |> Factory.insert()
         |> slot_for(cpu1.component)
 
-      {:ok, _} = MotherboardSlotController.link(slot, cpu1.component)
+      {:ok, slot} = MotherboardSlotController.link(slot, cpu1.component)
 
       assert {:error, :slot_already_linked} ==
         MotherboardSlotController.link(slot, cpu2.component)
     end
 
-    test "failure when component is already used" do
+    test "fails when component is already in use" do
       component = Factory.insert(:component)
       slot1 =
         :motherboard
