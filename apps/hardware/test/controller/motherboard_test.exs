@@ -10,15 +10,13 @@ defmodule Helix.Hardware.Controller.MotherboardTest do
   describe "motherboard fetching" do
     test "succeeds by id" do
       mobo = Factory.insert(:motherboard)
-
-      assert {:ok, found} = MotherboardController.find(mobo.motherboard_id)
-      assert mobo.motherboard_id == found.motherboard_id
+      assert {:ok, _} = MotherboardController.find(mobo.motherboard_id)
     end
 
     test "fails when motherboard doesn't exists" do
       mobo = Factory.build(:motherboard)
-
-      assert {:error, :notfound} == MotherboardController.find(mobo.motherboard_id)
+      assert {:error, :notfound} ==
+        MotherboardController.find(mobo.motherboard_id)
     end
   end
 
@@ -53,7 +51,7 @@ defmodule Helix.Hardware.Controller.MotherboardTest do
       MotherboardController.delete(mobo.motherboard_id)
       MotherboardController.delete(mobo.motherboard_id)
 
-      assert {:error, :notfound} =
+      assert {:error, :notfound} ==
         MotherboardController.find(mobo.motherboard_id)
     end
 

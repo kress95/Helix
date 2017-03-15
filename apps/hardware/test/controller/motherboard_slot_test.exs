@@ -15,9 +15,7 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
   describe "motherboard slot fetching" do
     test "succeeds by id" do
       slot = Factory.insert(:motherboard_slot)
-
-      assert {:ok, found} = MotherboardSlotController.find(slot.slot_id)
-      assert slot.slot_id == found.slot_id
+      assert {:ok, _} = MotherboardSlotController.find(slot.slot_id)
     end
 
     test "fails when motherboard slot doesn't exist" do
