@@ -55,23 +55,23 @@ defmodule Helix.Account.Controller.AccountTest do
       assert %Account{} = AccountController.fetch_by_email(account.email)
     end
 
-    test "returns nil if account with id doesn't exists" do
+    test "returns nil if account with id doesn't exist" do
       bogus = Factory.build(:account)
       refute AccountController.fetch(bogus.account_id)
     end
 
-    test "returns nil if account with username doesn't exists" do
+    test "returns nil if account with username doesn't exist" do
       bogus = Factory.build(:account)
       refute AccountController.fetch_by_username(bogus.username)
     end
 
-    test "returns nil if account with email doesn't exists" do
+    test "returns nil if account with email doesn't exist" do
       bogus = Factory.build(:account)
       refute AccountController.fetch_by_email(bogus.email)
     end
   end
 
-  describe "account deleting" do
+  describe "deleting" do
     test "succeeds by struct and id" do
       account1 = Factory.insert(:account)
       account2 = Factory.insert(:account)
@@ -95,7 +95,7 @@ defmodule Helix.Account.Controller.AccountTest do
     end
   end
 
-  describe "account updating" do
+  describe "updating" do
     test "changes its fields" do
       account = Factory.insert(:account)
       params = Factory.params_for(:account)
@@ -113,18 +113,17 @@ defmodule Helix.Account.Controller.AccountTest do
     end
 
     test "fails when email is already in use" do
-      account1 = Factory.insert(:account)
-      account2 = Factory.insert(:account)
+      %{email: bogus_email} = Factory.insert(:account)
 
-      params = %{email: account1.email}
+      account = Factory.insert(:account)
+      bogus = %{email: bogus_email}
 
-      {:error, cs} = AccountController.update(account2, params)
-
+      assert {:error, cs} = AccountController.update(account, bogus)
       assert :email in Keyword.keys(cs.errors)
     end
   end
 
-  describe "account signing in" do
+  describe "signing in" do
     test "succeeds with correct username and password" do
       params = Factory.params_for(:account)
       pass = params.password
@@ -136,13 +135,13 @@ defmodule Helix.Account.Controller.AccountTest do
 
     test "fails when username is invalid" do
       error = AccountController.login("invalid_username", "any_password")
-
       assert {:error, :notfound} == error
     end
 
     test "fails when password doesn't match" do
       params = Factory.params_for(:account)
       {:ok, account} = AccountController.create(params)
+
       error = AccountController.login(account.username, "incorrect_password")
 
       assert {:error, :notfound} == error
