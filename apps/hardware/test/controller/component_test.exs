@@ -4,28 +4,43 @@ defmodule Helix.Hardware.Controller.ComponentTest do
 
   alias Helix.Hardware.Controller.Component, as: ComponentController
   alias Helix.Hardware.Model.Component
-  alias Helix.Hardware.Repo
 
   alias Helix.Hardware.Factory
 
-  describe "fetching component" do
-    test "succeeds by id" do
+  describe "fetching" do
+    test "returns a record based on its identification" do
       c = Factory.insert(:component)
       assert %Component{} = ComponentController.fetch(c.component_id)
     end
 
-    test "fails when component doesn't exists" do
-      c = Factory.build(:component)
-      refute ComponentController.fetch(c.component_id)
+    test "returns nil if spec with id doesn't exist" do
+      bogus = Factory.build(:component)
+      refute ComponentController.fetch(bogus.component_id)
     end
   end
 
-  test "delete is idempotent" do
-    component = Factory.insert(:component)
+  describe "deleting" do
+    test "is idempotent" do
+      component = Factory.insert(:component)
 
-    assert Repo.get_by(Component, component_id: component.component_id)
-    ComponentController.delete(component.component_id)
-    ComponentController.delete(component.component_id)
-    refute Repo.get_by(Component, component_id: component.component_id)
+      assert ComponentController.fetch(component.component_id)
+
+      ComponentController.delete(component.component_id)
+      ComponentController.delete(component.component_id)
+
+      refute ComponentController.fetch(component.component_id)
+    end
+
+    test "can be done by its id or its struct" do
+      component = Factory.insert(:component)
+      assert ComponentController.fetch(component.component_id)
+      ComponentController.delete(component)
+      refute ComponentController.fetch(component.component_id)
+
+      component = Factory.insert(:component)
+      assert ComponentController.fetch(component.component_id)
+      ComponentController.delete(component.component_id)
+      refute ComponentController.fetch(component.component_id)
+    end
   end
 end

@@ -35,7 +35,9 @@ defmodule Helix.Hardware.Controller.Component do
   def fetch(component_id),
     do: Repo.get(Component, component_id)
 
-  @spec delete(HELL.PK.t) :: no_return
+  @spec delete(Component.t | HELL.PK.t) :: no_return
+  def delete(component = %Component{}),
+    do: delete(component.component_id)
   def delete(component_id) do
     component_id
     |> Component.Query.by_id()
