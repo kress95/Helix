@@ -4,53 +4,52 @@ defmodule Helix.Hardware.Controller.ComponentSpecTest do
 
   alias Helix.Hardware.Controller.ComponentSpec, as: ComponentSpecController
   alias Helix.Hardware.Model.ComponentSpec
-  alias Helix.Hardware.Repo
 
   alias Helix.Hardware.Factory
 
-  describe "fetching component_spec" do
-    test "succeeds by id" do
+  describe "fetching" do
+    test "returns a record based on its identification" do
       cs = Factory.insert(:component_spec)
       assert %ComponentSpec{} = ComponentSpecController.fetch(cs.spec_id)
     end
 
-    test "fails when spec doesn't exists" do
-      cs = Factory.build(:component_spec)
-      refute ComponentSpecController.fetch(cs.spec_id)
+    test "returns nil if spec with id doesn't exist" do
+      bogus = Factory.build(:component_spec)
+      refute ComponentSpecController.fetch(bogus.spec_id)
     end
   end
 
-  test "updating component_spec overrides its spec" do
+  test "updating changes spec map" do
     cs = Factory.insert(:component_spec)
-    update_params = %{spec: %{"test" => Burette.Color.name()}}
+    params = %{spec: %{"test" => Burette.Color.name()}}
 
-    {:ok, cs} = ComponentSpecController.update(cs, update_params)
+    {:ok, cs} = ComponentSpecController.update(cs, params)
 
-    assert update_params.spec == cs.spec
+    assert params.spec == cs.spec
   end
 
-  describe "deleting component_spec" do
+  describe "deleting" do
     test "is idempotent" do
       cs = Factory.insert(:component_spec)
 
-      assert Repo.get_by(ComponentSpec, spec_id: cs.spec_id)
+      assert ComponentSpecController.fetch(cs.spec_id)
 
       ComponentSpecController.delete(cs.spec_id)
       ComponentSpecController.delete(cs.spec_id)
 
-      refute Repo.get_by(ComponentSpec, spec_id: cs.spec_id)
+      refute ComponentSpecController.fetch(cs.spec_id)
     end
 
-    test "works by id and by struct" do
+    test "can be done by its id or its struct" do
       cs = Factory.insert(:component_spec)
+      assert ComponentSpecController.fetch(cs.spec_id)
       ComponentSpecController.delete(cs)
-
-      refute Repo.get_by(ComponentSpec, spec_id: cs.spec_id)
+      refute ComponentSpecController.fetch(cs.spec_id)
 
       cs = Factory.insert(:component_spec)
+      assert ComponentSpecController.fetch(cs.spec_id)
       ComponentSpecController.delete(cs.spec_id)
-
-      refute Repo.get_by(ComponentSpec, spec_id: cs.spec_id)
+      refute ComponentSpecController.fetch(cs.spec_id)
     end
   end
 end
