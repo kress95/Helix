@@ -13,20 +13,20 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
     |> Enum.random()
   end
 
-  describe "motherboard slot fetching" do
-    test "succeeds by id" do
+  describe "fetching" do
+    test "returns a record based on its identification" do
       slot = Factory.insert(:motherboard_slot)
       assert %MotherboardSlot{} = MotherboardSlotController.fetch(slot.slot_id)
     end
 
-    test "fails when motherboard slot doesn't exist" do
+    test "returns nil if slot with id doesn't exist" do
       slot = Factory.build(:motherboard_slot)
       refute MotherboardSlotController.fetch(slot.slot_id)
     end
   end
 
-  describe "motherboard slot linking" do
-    test "links a component to slot" do
+  describe "linking" do
+    test "links a component to a motherboard slot" do
       component = Factory.insert(:component)
       slot =
         :motherboard
@@ -69,7 +69,7 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
     end
   end
 
-  test "unlink is idempotent" do
+  test "unlinking is idempotent" do
     component = Factory.insert(:component)
     slot =
       :motherboard
@@ -77,13 +77,12 @@ defmodule Helix.Hardware.Controller.MotherboardSlotTest do
       |> slot_for(component)
 
     {:ok, slot} = MotherboardSlotController.link(slot, component)
-
     assert slot.link_component_id
+
     assert {:ok, _} = MotherboardSlotController.unlink(slot)
     assert {:ok, _} = MotherboardSlotController.unlink(slot)
 
     slot = MotherboardSlotController.fetch(slot.slot_id)
-
     refute slot.link_component_id
   end
 end
