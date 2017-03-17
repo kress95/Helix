@@ -80,8 +80,8 @@ defmodule Helix.Hardware.Controller.Motherboard do
   end
 
   @spec delete(Motherboard.t | HELL.PK.t) :: no_return
-  def delete(%Motherboard{motherboard_id: mid}),
-    do: delete(mid)
+  def delete(%Motherboard{motherboard_id: motherboard_id}),
+    do: delete(motherboard_id)
   def delete(motherboard_id) do
     motherboard_id
     |> Motherboard.Query.by_id()

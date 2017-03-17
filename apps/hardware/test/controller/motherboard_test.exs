@@ -8,15 +8,15 @@ defmodule Helix.Hardware.Controller.MotherboardTest do
 
   alias Helix.Hardware.Factory
 
-  describe "motherboard fetching" do
-    test "succeeds by id" do
+  describe "fetching" do
+    test "returns a record based on its identification" do
       mobo = Factory.insert(:motherboard)
       assert %Motherboard{} = MotherboardController.fetch(mobo.motherboard_id)
     end
 
-    test "fails when motherboard doesn't exists" do
-      mobo = Factory.build(:motherboard)
-      refute MotherboardController.fetch(mobo.motherboard_id)
+    test "returns nil if spec with id doesn't exist" do
+      bogus = Factory.build(:motherboard)
+      refute MotherboardController.fetch(bogus.motherboard_id)
     end
   end
 
@@ -42,7 +42,7 @@ defmodule Helix.Hardware.Controller.MotherboardTest do
     assert [] == non_empty_slots
   end
 
-  describe "motherboard deleting" do
+  describe "deleting" do
     test "is idempotent" do
       mobo = Factory.insert(:motherboard)
 
@@ -51,6 +51,18 @@ defmodule Helix.Hardware.Controller.MotherboardTest do
       MotherboardController.delete(mobo.motherboard_id)
       MotherboardController.delete(mobo.motherboard_id)
 
+      refute MotherboardController.fetch(mobo.motherboard_id)
+    end
+
+    test "can be done by its id or its struct" do
+      mobo = Factory.insert(:motherboard)
+      assert MotherboardController.fetch(mobo.motherboard_id)
+      MotherboardController.delete(mobo)
+      refute MotherboardController.fetch(mobo.motherboard_id)
+
+      mobo = Factory.insert(:motherboard)
+      assert MotherboardController.fetch(mobo.motherboard_id)
+      MotherboardController.delete(mobo.motherboard_id)
       refute MotherboardController.fetch(mobo.motherboard_id)
     end
 
