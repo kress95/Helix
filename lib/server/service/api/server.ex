@@ -58,4 +58,10 @@ defmodule Helix.Server.Service.API.Server do
   def detach(server) do
     ServerController.detach(server)
   end
+
+  # FIXME: WIP #109
+  @spec delete(Server.t | Server.id) :: :ok
+  def delete(server) do
+    ServerController.delete(server)
+  end
 end
