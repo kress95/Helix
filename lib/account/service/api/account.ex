@@ -85,5 +85,11 @@ defmodule Helix.Account.Service.API.Account do
   Invalidates session `token`
   """
   def logout(token),
-   do: Helix.Account.Service.API.Session.invalidate_token(token)
+    do: Helix.Account.Service.API.Session.invalidate_token(token)
+
+  # FIXME: WIP #109
+  @spec delete(Account.t) :: :ok
+  def delete(account) do
+    AccountController.delete(account)
+  end
 end

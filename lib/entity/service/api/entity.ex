@@ -3,8 +3,12 @@ defmodule Helix.Entity.Service.API.Entity do
   alias Helix.Entity.Controller.Entity, as: EntityController
   alias Helix.Entity.Model.Entity
 
-  # Note that Entity API has no create function because it should be created
-  # through reactions to events
+  @spec create(Entity.creation_params) ::
+    {:ok, Entity.t}
+    | {:error, Ecto.Changeset.t}
+  def create(params) do
+    EntityController.create(params)
+  end
 
   @spec fetch(HELL.PK.t) :: Entity.t | nil
   def fetch(id) do
@@ -34,5 +38,11 @@ defmodule Helix.Entity.Service.API.Entity do
   @spec unlink_server(HELL.PK.t) :: :ok | {:error, reason :: term}
   def unlink_server(server) do
     EntityController.unlink_server(server)
+  end
+
+  # FIXME: WIP #109
+  @spec delete(Entity.t | Entity.id) :: :ok
+  def delete(entity) do
+    EntityController.delete(entity)
   end
 end
